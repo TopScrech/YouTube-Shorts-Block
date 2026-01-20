@@ -24,7 +24,8 @@
         "matches": [
             "*://youtube.com/*",
             "*://*.youtube.com/*"
-        ]
+        ],
+        "run_at": "document_start"
     }],
 
     "action": {

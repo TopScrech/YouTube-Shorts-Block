@@ -4,13 +4,11 @@
     const SHORTS_HREF_RE = /\/shorts(\/|$|\?)/i;
     const SHORTS_TEXT_RE = /^shorts$/i;
 
-    const removed = new WeakSet();
-
     const getText = (el) => (el && el.textContent ? el.textContent.trim() : "");
 
-    const markRemoved = (el) => {
-        if (!el || removed.has(el)) return false;
-        removed.add(el);
+    const removeElement = (el) => {
+        if (!el) return false;
+        if (!el.isConnected) return false;
         el.remove();
         return true;
     };
@@ -20,13 +18,12 @@
         pivotBars.forEach((bar) => {
             const items = bar.querySelectorAll("ytm-pivot-bar-item-renderer, ytm-pivot-bar-item");
             items.forEach((item) => {
-                if (removed.has(item)) return;
                 const link = item.querySelector("a[href]");
                 const aria = item.getAttribute("aria-label") || (link && link.getAttribute("aria-label"));
                 const label = aria ? aria.trim() : getText(item);
                 const href = link && link.getAttribute("href");
                 if ((href && SHORTS_HREF_RE.test(href)) || (label && SHORTS_TEXT_RE.test(label))) {
-                    markRemoved(item);
+                    removeElement(item);
                 }
             });
         });
@@ -44,7 +41,7 @@
                     link.closest("ytm-pivot-bar-item") ||
                     link.closest("[role='tab']") ||
                     link.closest("a");
-                markRemoved(container || link);
+                removeElement(container || link);
             });
         });
     };
@@ -54,12 +51,27 @@
         removeShortsLinksInNav(root);
     };
 
+    let sweepScheduled = false;
+    const scheduleSweep = () => {
+        if (sweepScheduled) return;
+        sweepScheduled = true;
+        requestAnimationFrame(() => {
+            sweepScheduled = false;
+            removeShortsEverywhere(document);
+        });
+    };
+
     const observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
-            mutation.addedNodes.forEach((node) => {
-                if (!(node instanceof Element)) return;
-                removeShortsEverywhere(node);
-            });
+            if (mutation.type === "childList") {
+                if (mutation.addedNodes.length) {
+                    scheduleSweep();
+                }
+            } else if (mutation.type === "attributes") {
+                scheduleSweep();
+            } else if (mutation.type === "characterData") {
+                scheduleSweep();
+            }
         }
     });
 
@@ -67,7 +79,10 @@
         removeShortsEverywhere(document);
         observer.observe(document.documentElement || document.body, {
             childList: true,
-            subtree: true
+            subtree: true,
+            attributes: true,
+            characterData: true,
+            attributeFilter: ["href", "aria-label", "title", "class", "role"]
         });
     };
 
@@ -76,4 +91,14 @@
     } else {
         start();
     }
+
+    window.addEventListener("pageshow", () => {
+        scheduleSweep();
+    });
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            scheduleSweep();
+        }
+    });
 })();
