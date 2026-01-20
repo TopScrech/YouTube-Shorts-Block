@@ -21,7 +21,10 @@
 
     "content_scripts": [{
         "js": [ "content.js" ],
-        "matches": [ "*://example.com/*" ]
+        "matches": [
+            "*://youtube.com/*",
+            "*://*.youtube.com/*"
+        ]
     }],
 
     "action": {
