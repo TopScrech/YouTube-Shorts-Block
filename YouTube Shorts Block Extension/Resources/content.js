@@ -89,6 +89,27 @@
         });
     };
 
+    const removeShortsFromDesktopSidebar = (root = document) => {
+        const entries = root.querySelectorAll("ytd-guide-entry-renderer, ytd-mini-guide-entry-renderer");
+        entries.forEach((entry) => {
+            const link = entry.querySelector("a[href]");
+            const href = link && link.getAttribute("href");
+            const aria = entry.getAttribute("aria-label") || (link && (link.getAttribute("aria-label") || link.getAttribute("title")));
+            const label = aria ? aria.trim() : getText(entry);
+            if ((href && SHORTS_HREF_RE.test(href)) || (label && SHORTS_TEXT_RE.test(label))) {
+                hideElement(entry);
+            }
+        });
+
+        const sidebarLinks = root.querySelectorAll("ytd-guide-renderer a[href], ytd-mini-guide-renderer a[href]");
+        sidebarLinks.forEach((link) => {
+            const href = link.getAttribute("href");
+            if (!href || !SHORTS_HREF_RE.test(href)) return;
+            const entry = link.closest("ytd-guide-entry-renderer, ytd-mini-guide-entry-renderer") || link;
+            hideElement(entry);
+        });
+    };
+
     const removeShortsChannelTabs = (root = document) => {
         const tabLists = root.querySelectorAll("ytm-channel-sub-menu-renderer, ytm-tab-row-renderer, [role='tablist']");
         tabLists.forEach((list) => {
@@ -192,6 +213,7 @@
     const removeShortsEverywhere = (root = document) => {
         removeShortsFromPivotBar(root);
         removeShortsLinksInNav(root);
+        removeShortsFromDesktopSidebar(root);
         removeShortsChannelTabs(root);
         removeShortsShelves(root);
     };
