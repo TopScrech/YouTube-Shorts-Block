@@ -27,3 +27,22 @@ body {
     font: -apple-system-short-body;
     text-align: center;
 }
+
+h1 {
+    margin: 0;
+    font: -apple-system-title2;
+}
+
+p {
+    margin: 0;
+}
+
+ol {
+    margin: 0;
+    padding-left: 1.2em;
+    text-align: left;
+}
+
+li {
+    margin-bottom: 0.4em;
+}

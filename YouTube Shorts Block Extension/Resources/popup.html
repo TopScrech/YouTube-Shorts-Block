@@ -6,6 +6,17 @@
     <script type="module" src="popup.js"></script>
 </head>
 <body>
-    <strong>Hello World!</strong>
+    <main class="popup">
+        <h1 class="title">Shorts Block</h1>
+        <label class="toggle" for="enabled-toggle">
+            <span class="toggle-label">Block Shorts</span>
+            <span class="toggle-control">
+                <input id="enabled-toggle" type="checkbox" checked>
+                <span class="toggle-track" aria-hidden="true"></span>
+                <span class="toggle-thumb" aria-hidden="true"></span>
+            </span>
+        </label>
+        <p class="hint" id="status-text">Blocking is on.</p>
+    </main>
 </body>
 </html>

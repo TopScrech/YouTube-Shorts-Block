@@ -3,23 +3,57 @@
 
     const SHORTS_HREF_RE = /\/shorts(\/|$|\?)/i;
     const SHORTS_TEXT_RE = /^shorts$/i;
+    const STORAGE_KEY = "enabled";
+    const DEFAULT_ENABLED = true;
 
     const getText = (el) => (el && el.textContent ? el.textContent.trim() : "");
-
-    const removeElement = (el) => {
-        if (!el) return false;
-        if (!el.isConnected) return false;
-        el.remove();
-        return true;
-    };
 
     const hideElement = (el) => {
         if (!el) return false;
         if (!el.isConnected) return false;
+        if (el.getAttribute("data-shorts-blocked") === "true") return false;
+        const prevDisplay = el.style.getPropertyValue("display");
+        const prevDisplayPriority = el.style.getPropertyPriority("display");
+        const prevVisibility = el.style.getPropertyValue("content-visibility");
+        const prevVisibilityPriority = el.style.getPropertyPriority("content-visibility");
         el.setAttribute("data-shorts-blocked", "true");
+        el.setAttribute("data-shorts-blocked-display", prevDisplay);
+        el.setAttribute("data-shorts-blocked-display-priority", prevDisplayPriority);
+        el.setAttribute("data-shorts-blocked-content-visibility", prevVisibility);
+        el.setAttribute("data-shorts-blocked-content-visibility-priority", prevVisibilityPriority);
         el.style.setProperty("display", "none", "important");
         el.style.setProperty("content-visibility", "hidden", "important");
         return true;
+    };
+
+    const restoreElement = (el) => {
+        if (!el) return false;
+        if (el.getAttribute("data-shorts-blocked") !== "true") return false;
+        const prevDisplay = el.getAttribute("data-shorts-blocked-display") || "";
+        const prevDisplayPriority = el.getAttribute("data-shorts-blocked-display-priority") || "";
+        const prevVisibility = el.getAttribute("data-shorts-blocked-content-visibility") || "";
+        const prevVisibilityPriority = el.getAttribute("data-shorts-blocked-content-visibility-priority") || "";
+        if (prevDisplay) {
+            el.style.setProperty("display", prevDisplay, prevDisplayPriority);
+        } else {
+            el.style.removeProperty("display");
+        }
+        if (prevVisibility) {
+            el.style.setProperty("content-visibility", prevVisibility, prevVisibilityPriority);
+        } else {
+            el.style.removeProperty("content-visibility");
+        }
+        el.removeAttribute("data-shorts-blocked");
+        el.removeAttribute("data-shorts-blocked-display");
+        el.removeAttribute("data-shorts-blocked-display-priority");
+        el.removeAttribute("data-shorts-blocked-content-visibility");
+        el.removeAttribute("data-shorts-blocked-content-visibility-priority");
+        return true;
+    };
+
+    const restoreShortsEverywhere = (root = document) => {
+        const blocked = root.querySelectorAll("[data-shorts-blocked='true']");
+        blocked.forEach((el) => restoreElement(el));
     };
 
     const removeShortsFromPivotBar = (root = document) => {
@@ -32,7 +66,7 @@
                 const label = aria ? aria.trim() : getText(item);
                 const href = link && link.getAttribute("href");
                 if ((href && SHORTS_HREF_RE.test(href)) || (label && SHORTS_TEXT_RE.test(label))) {
-                    removeElement(item);
+                    hideElement(item);
                 }
             });
         });
@@ -50,7 +84,7 @@
                     link.closest("ytm-pivot-bar-item") ||
                     link.closest("[role='tab']") ||
                     link.closest("a");
-                removeElement(container || link);
+                hideElement(container || link);
             });
         });
     };
@@ -88,6 +122,17 @@
 
     const isInNavigation = (el) => !!(el && el.closest && el.closest(NAV_CONTAINER_SELECTOR));
     const isInChannelTabs = (el) => !!(el && el.closest && el.closest(CHANNEL_TAB_CONTAINER_SELECTOR));
+
+    const storage = (() => {
+        try {
+            return typeof browser !== "undefined" && browser.storage && browser.storage.local ? browser.storage.local : null;
+        } catch (error) {
+            return null;
+        }
+    })();
+
+    let enabled = DEFAULT_ENABLED;
+    let documentReady = document.readyState !== "loading";
 
     const containerHasShortsLabel = (container) => {
         if (!container) return false;
@@ -152,11 +197,16 @@
     };
 
     let sweepScheduled = false;
+    let observerActive = false;
+    let settingsLoaded = false;
+
     const scheduleSweep = () => {
+        if (!settingsLoaded || !enabled) return;
         if (sweepScheduled) return;
         sweepScheduled = true;
         requestAnimationFrame(() => {
             sweepScheduled = false;
+            if (!enabled) return;
             removeShortsEverywhere(document);
         });
     };
@@ -175,21 +225,88 @@
         }
     });
 
-    const start = () => {
-        removeShortsEverywhere(document);
-        observer.observe(document.documentElement || document.body, {
+    const startObserver = () => {
+        if (observerActive) return;
+        const root = document.documentElement || document.body;
+        if (!root) return;
+        observer.observe(root, {
             childList: true,
             subtree: true,
             attributes: true,
             characterData: true,
             attributeFilter: ["href", "aria-label", "title", "class", "role"]
         });
+        observerActive = true;
     };
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", start, { once: true });
-    } else {
+    const stopObserver = () => {
+        if (!observerActive) return;
+        observer.disconnect();
+        observerActive = false;
+    };
+
+    const start = () => {
+        if (!enabled) return;
+        removeShortsEverywhere(document);
+        startObserver();
+    };
+
+    const maybeStart = () => {
+        if (!documentReady || !settingsLoaded || !enabled) return;
         start();
+    };
+
+    const setEnabled = (nextEnabled) => {
+        const normalized = nextEnabled !== false;
+        if (enabled === normalized) return;
+        enabled = normalized;
+        if (enabled) {
+            if (documentReady) {
+                start();
+            }
+        } else {
+            stopObserver();
+            restoreShortsEverywhere(document);
+        }
+    };
+
+    const applyInitialSettings = (initialEnabled) => {
+        enabled = initialEnabled !== false;
+        settingsLoaded = true;
+        if (enabled) {
+            maybeStart();
+        } else {
+            stopObserver();
+            restoreShortsEverywhere(document);
+        }
+    };
+
+    const handleReady = () => {
+        documentReady = true;
+        maybeStart();
+    };
+
+    if (!documentReady) {
+        document.addEventListener("DOMContentLoaded", handleReady, { once: true });
+    } else {
+        handleReady();
+    }
+
+    if (storage) {
+        storage
+            .get({ [STORAGE_KEY]: DEFAULT_ENABLED })
+            .then((result) => applyInitialSettings(result[STORAGE_KEY]))
+            .catch(() => applyInitialSettings(DEFAULT_ENABLED));
+    } else {
+        applyInitialSettings(DEFAULT_ENABLED);
+    }
+
+    if (typeof browser !== "undefined" && browser.storage && browser.storage.onChanged) {
+        browser.storage.onChanged.addListener((changes, area) => {
+            if (area !== "local") return;
+            if (!changes[STORAGE_KEY]) return;
+            setEnabled(changes[STORAGE_KEY].newValue);
+        });
     }
 
     window.addEventListener("pageshow", () => {
