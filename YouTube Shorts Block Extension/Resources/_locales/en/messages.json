@@ -1,0 +1,10 @@
+{
+    "extension_name": {
+        "message": "YouTube Shorts Block Extension",
+        "description": "The display name for the extension."
+    },
+    "extension_description": {
+        "message": "This is YouTube Shorts Block Extension. You should tell us what your extension does here.",
+        "description": "Description of what the extension does."
+    }
+}
