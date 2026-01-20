@@ -13,6 +13,15 @@
         return true;
     };
 
+    const hideElement = (el) => {
+        if (!el) return false;
+        if (!el.isConnected) return false;
+        el.setAttribute("data-shorts-blocked", "true");
+        el.style.setProperty("display", "none", "important");
+        el.style.setProperty("content-visibility", "hidden", "important");
+        return true;
+    };
+
     const removeShortsFromPivotBar = (root = document) => {
         const pivotBars = root.querySelectorAll("ytm-pivot-bar-renderer, ytm-pivot-bar");
         pivotBars.forEach((bar) => {
@@ -46,9 +55,60 @@
         });
     };
 
+    const NAV_CONTAINER_SELECTOR = "nav, ytm-pivot-bar-renderer, ytm-pivot-bar, ytm-mobile-topbar-renderer";
+
+    const isInNavigation = (el) => !!(el && el.closest && el.closest(NAV_CONTAINER_SELECTOR));
+
+    const containerHasShortsLabel = (container) => {
+        if (!container) return false;
+        if (container.querySelector('a[href*="/shorts"]')) return true;
+        const labelNodes = container.querySelectorAll(
+            "[aria-label], [title], h1, h2, h3, ytm-shelf-title, ytm-shelf-header-renderer"
+        );
+        for (const node of labelNodes) {
+            const aria = node.getAttribute && node.getAttribute("aria-label");
+            const title = node.getAttribute && node.getAttribute("title");
+            const text = (aria || title || getText(node)).trim();
+            if (text && SHORTS_TEXT_RE.test(text)) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    const removeShortsShelves = (root = document) => {
+        const reelShelves = root.querySelectorAll("ytm-reel-shelf-renderer, ytm-reel-item-renderer, ytd-reel-shelf-renderer");
+        reelShelves.forEach((shelf) => {
+            if (isInNavigation(shelf)) return;
+            hideElement(shelf);
+        });
+
+        const containers = root.querySelectorAll("ytm-rich-section-renderer, ytm-shelf-renderer, ytd-rich-section-renderer");
+        containers.forEach((container) => {
+            if (containerHasShortsLabel(container)) {
+                const shelf =
+                    container.querySelector("ytm-reel-shelf-renderer, ytm-reel-item-renderer, ytd-reel-shelf-renderer, ytm-shelf-renderer") ||
+                    container;
+                hideElement(shelf);
+            }
+        });
+
+        const shortsLinks = root.querySelectorAll('a[href*="/shorts"]');
+        shortsLinks.forEach((link) => {
+            if (isInNavigation(link)) return;
+            const href = link.getAttribute("href");
+            if (!href || !SHORTS_HREF_RE.test(href)) return;
+            const container =
+                link.closest("ytm-reel-shelf-renderer, ytm-shelf-renderer, ytd-reel-shelf-renderer") ||
+                link;
+            hideElement(container);
+        });
+    };
+
     const removeShortsEverywhere = (root = document) => {
         removeShortsFromPivotBar(root);
         removeShortsLinksInNav(root);
+        removeShortsShelves(root);
     };
 
     let sweepScheduled = false;
