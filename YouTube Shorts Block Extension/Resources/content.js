@@ -55,15 +55,52 @@
         });
     };
 
+    const removeShortsChannelTabs = (root = document) => {
+        const tabLists = root.querySelectorAll("ytm-channel-sub-menu-renderer, ytm-tab-row-renderer, [role='tablist']");
+        tabLists.forEach((list) => {
+            const tabs = list.querySelectorAll(
+                "ytm-channel-tab-renderer, ytm-channel-sub-menu-item-renderer, ytm-tab-row-item-renderer, [role='tab'], a[href]"
+            );
+            tabs.forEach((tab) => {
+                const link = tab.matches && tab.matches("a[href]") ? tab : tab.querySelector && tab.querySelector("a[href]");
+                const href = link && link.getAttribute("href");
+                const label = getText(tab);
+                if ((href && SHORTS_HREF_RE.test(href)) || (label && SHORTS_TEXT_RE.test(label))) {
+                    const container = tab.closest ? tab.closest(CHANNEL_TAB_CONTAINER_SELECTOR) : null;
+                    hideElement(container || tab);
+                }
+            });
+        });
+
+        const shortsLinks = root.querySelectorAll('a[href*="/shorts"]');
+        shortsLinks.forEach((link) => {
+            if (!isInChannelTabs(link)) return;
+            const href = link.getAttribute("href");
+            if (!href || !SHORTS_HREF_RE.test(href)) return;
+            const container = link.closest(CHANNEL_TAB_CONTAINER_SELECTOR) || link;
+            hideElement(container);
+        });
+    };
+
     const NAV_CONTAINER_SELECTOR = "nav, ytm-pivot-bar-renderer, ytm-pivot-bar, ytm-mobile-topbar-renderer";
+    const CHANNEL_TAB_CONTAINER_SELECTOR =
+        "ytm-channel-tab-renderer, ytm-channel-sub-menu-renderer, ytm-channel-sub-menu-item-renderer, ytm-tab-row-renderer, ytm-tab-row-item-renderer, [role='tab'], [role='tablist']";
 
     const isInNavigation = (el) => !!(el && el.closest && el.closest(NAV_CONTAINER_SELECTOR));
+    const isInChannelTabs = (el) => !!(el && el.closest && el.closest(CHANNEL_TAB_CONTAINER_SELECTOR));
 
     const containerHasShortsLabel = (container) => {
         if (!container) return false;
         if (container.querySelector('a[href*="/shorts"]')) return true;
+        const attrKeys = ["section-identifier", "tab-identifier", "identifier", "data-identifier", "data-section-id"];
+        for (const key of attrKeys) {
+            const value = container.getAttribute && container.getAttribute(key);
+            if (value && /shorts/i.test(value)) {
+                return true;
+            }
+        }
         const labelNodes = container.querySelectorAll(
-            "[aria-label], [title], h1, h2, h3, ytm-shelf-title, ytm-shelf-header-renderer"
+            "[aria-label], [title], h1, h2, h3, ytm-shelf-title, ytm-shelf-header-renderer, ytm-channel-shelf-title-renderer, ytm-channel-shelf-header-renderer"
         );
         for (const node of labelNodes) {
             const aria = node.getAttribute && node.getAttribute("aria-label");
@@ -83,7 +120,9 @@
             hideElement(shelf);
         });
 
-        const containers = root.querySelectorAll("ytm-rich-section-renderer, ytm-shelf-renderer, ytd-rich-section-renderer");
+        const containers = root.querySelectorAll(
+            "ytm-rich-section-renderer, ytm-shelf-renderer, ytd-rich-section-renderer, ytm-channel-shelf-renderer"
+        );
         containers.forEach((container) => {
             if (containerHasShortsLabel(container)) {
                 const shelf =
@@ -99,7 +138,7 @@
             const href = link.getAttribute("href");
             if (!href || !SHORTS_HREF_RE.test(href)) return;
             const container =
-                link.closest("ytm-reel-shelf-renderer, ytm-shelf-renderer, ytd-reel-shelf-renderer") ||
+                link.closest("ytm-reel-shelf-renderer, ytm-shelf-renderer, ytd-reel-shelf-renderer, ytm-channel-shelf-renderer") ||
                 link;
             hideElement(container);
         });
@@ -108,6 +147,7 @@
     const removeShortsEverywhere = (root = document) => {
         removeShortsFromPivotBar(root);
         removeShortsLinksInNav(root);
+        removeShortsChannelTabs(root);
         removeShortsShelves(root);
     };
 
