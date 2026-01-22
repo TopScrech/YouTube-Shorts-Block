@@ -5,8 +5,176 @@
     const SHORTS_TEXT_RE = /^shorts$/i;
     const STORAGE_KEY = "enabled";
     const DEFAULT_ENABLED = true;
+    const PLAYLIST_STORAGE_KEY = "playlistButtonEnabled";
+    const DEFAULT_PLAYLIST_ENABLED = true;
+    const PLAYLIST_BUTTON_ID = "yt-tweaks-playlist-return";
+    const PLAYLIST_STYLE_ID = "yt-tweaks-playlist-return-style";
 
     const getText = (el) => (el && el.textContent ? el.textContent.trim() : "");
+
+    const isWatchPage = () => window.location.pathname === "/watch";
+
+    const getPlaylistId = () => {
+        try {
+            return new URL(window.location.href).searchParams.get("list");
+        } catch (error) {
+            return null;
+        }
+    };
+
+    const ensurePlaylistStyle = () => {
+        if (document.getElementById(PLAYLIST_STYLE_ID)) return;
+
+        const style = document.createElement("style");
+        style.id = PLAYLIST_STYLE_ID;
+        style.textContent = `
+            #${PLAYLIST_BUTTON_ID} {
+                display: block;
+                width: calc(100% - 24px);
+                box-sizing: border-box;
+                padding: 12px 20px !important;
+                margin: 12px;
+                border-radius: 999px;
+                background: var(--yt-spec-brand-button-background, #065fd4);
+                color: var(--yt-spec-brand-button-text, #fff);
+                text-align: center;
+                font-weight: 500;
+                font-family: Roboto, Arial, sans-serif;
+                font-size: 14px;
+                line-height: 20px;
+                text-decoration: none;
+                letter-spacing: 0.2px;
+                transition: filter 0.15s ease-in-out;
+            }
+
+            #${PLAYLIST_BUTTON_ID}:hover {
+                filter: brightness(1.05);
+            }
+
+            #${PLAYLIST_BUTTON_ID}:active {
+                filter: brightness(0.95);
+            }
+        `;
+        (document.head || document.documentElement).appendChild(style);
+    };
+
+    const buildPlaylistUrl = (playlistId) => {
+        const url = new URL("https://www.youtube.com/playlist");
+        url.searchParams.set("list", playlistId);
+        return url.toString();
+    };
+
+    const getPlaylistName = () => {
+        const selectors = [
+            "ytd-playlist-panel-renderer #title",
+            "ytd-playlist-panel-renderer #title-text",
+            "ytd-playlist-panel-renderer h3",
+            "ytd-playlist-panel-renderer .title",
+            "ytm-playlist-panel-renderer .title",
+            "ytm-playlist-panel-renderer .playlist-title",
+            "ytm-playlist-panel-renderer h3",
+            "ytm-playlist-panel-renderer .title-text"
+        ];
+
+        for (const selector of selectors) {
+            const element = document.querySelector(selector);
+            if (element && element.textContent) {
+                const text = element.textContent.trim();
+                if (text) return text;
+            }
+        }
+
+        return null;
+    };
+
+    const normalizePlaylistLabel = (label) => {
+        if (!label) return null;
+        const trimmed = label.trim();
+        if (trimmed === "WL") return "Watch Later";
+        if (trimmed === "LL") return "Liked Videos";
+        return trimmed;
+    };
+
+    const buildPlaylistLabel = (playlistId) => {
+        const playlistName = normalizePlaylistLabel(getPlaylistName());
+        if (playlistName) {
+            return `Return to playlist ${playlistName}`;
+        }
+
+        const fallback = normalizePlaylistLabel(playlistId);
+        return `Return to playlist ${fallback || "playlist"}`;
+    };
+
+    const findCommentsSection = () => (
+        document.querySelector(
+            "ytd-comments#comments," +
+                " ytm-item-section-renderer[section-identifier='comment-item-section']," +
+                " ytm-item-section-renderer.comment-section," +
+                " ytm-comment-section-renderer," +
+                " ytm-comments-entry-point-renderer"
+        )
+    );
+
+    const findActionBar = () => (
+        document.querySelector(
+            "ytd-menu-renderer," +
+                " ytm-slim-video-action-bar-renderer," +
+                " ytm-video-action-bar-renderer"
+        )
+    );
+
+    const insertAfter = (node, referenceNode) => {
+        const parent = referenceNode.parentElement;
+        if (!parent) return;
+        if (referenceNode.nextSibling) {
+            parent.insertBefore(node, referenceNode.nextSibling);
+        } else {
+            parent.appendChild(node);
+        }
+    };
+
+    const ensurePlaylistButton = () => {
+        const button = document.getElementById(PLAYLIST_BUTTON_ID);
+        if (!settingsLoaded || !enabled || !playlistEnabled) {
+            if (button) button.remove();
+            return;
+        }
+
+        const playlistId = getPlaylistId();
+        if (!playlistId || !isWatchPage()) {
+            if (button) button.remove();
+            return;
+        }
+
+        const comments = findCommentsSection();
+        const actionBar = findActionBar();
+        if (!comments && !actionBar) return;
+
+        ensurePlaylistStyle();
+
+        const playlistUrl = buildPlaylistUrl(playlistId);
+        const buttonLabel = buildPlaylistLabel(playlistId);
+
+        if (button) {
+            button.href = playlistUrl;
+            button.textContent = buttonLabel;
+            button.setAttribute("aria-label", buttonLabel);
+            return;
+        }
+
+        const link = document.createElement("a");
+        link.id = PLAYLIST_BUTTON_ID;
+        link.href = playlistUrl;
+        link.textContent = buttonLabel;
+        link.setAttribute("role", "button");
+        link.setAttribute("aria-label", buttonLabel);
+
+        if (comments && comments.parentElement) {
+            comments.parentElement.insertBefore(link, comments);
+        } else if (actionBar) {
+            insertAfter(link, actionBar);
+        }
+    };
 
     const hideElement = (el) => {
         if (!el) return false;
@@ -153,7 +321,9 @@
     })();
 
     let enabled = DEFAULT_ENABLED;
+    let playlistEnabled = DEFAULT_PLAYLIST_ENABLED;
     let documentReady = document.readyState !== "loading";
+    let playlistEnsureQueued = false;
 
     const containerHasShortsLabel = (container) => {
         if (!container) return false;
@@ -222,6 +392,16 @@
     let observerActive = false;
     let settingsLoaded = false;
 
+    const schedulePlaylistEnsure = () => {
+        if (!settingsLoaded) return;
+        if (playlistEnsureQueued) return;
+        playlistEnsureQueued = true;
+        requestAnimationFrame(() => {
+            playlistEnsureQueued = false;
+            ensurePlaylistButton();
+        });
+    };
+
     const scheduleSweep = () => {
         if (!settingsLoaded || !enabled) return;
         if (sweepScheduled) return;
@@ -234,6 +414,9 @@
     };
 
     const observer = new MutationObserver((mutations) => {
+        if (mutations.length) {
+            schedulePlaylistEnsure();
+        }
         for (const mutation of mutations) {
             if (mutation.type === "childList") {
                 if (mutation.addedNodes.length) {
@@ -270,6 +453,7 @@
     const start = () => {
         if (!enabled) return;
         removeShortsEverywhere(document);
+        schedulePlaylistEnsure();
         startObserver();
     };
 
@@ -289,11 +473,20 @@
         } else {
             stopObserver();
             restoreShortsEverywhere(document);
+            ensurePlaylistButton();
         }
     };
 
-    const applyInitialSettings = (initialEnabled) => {
+    const setPlaylistEnabled = (nextEnabled) => {
+        const normalized = nextEnabled !== false;
+        if (playlistEnabled === normalized) return;
+        playlistEnabled = normalized;
+        schedulePlaylistEnsure();
+    };
+
+    const applyInitialSettings = (initialEnabled, initialPlaylistEnabled) => {
         enabled = initialEnabled !== false;
+        playlistEnabled = initialPlaylistEnabled !== false;
         settingsLoaded = true;
         if (enabled) {
             maybeStart();
@@ -301,6 +494,7 @@
             stopObserver();
             restoreShortsEverywhere(document);
         }
+        schedulePlaylistEnsure();
     };
 
     const handleReady = () => {
@@ -316,28 +510,42 @@
 
     if (storage) {
         storage
-            .get({ [STORAGE_KEY]: DEFAULT_ENABLED })
-            .then((result) => applyInitialSettings(result[STORAGE_KEY]))
-            .catch(() => applyInitialSettings(DEFAULT_ENABLED));
+            .get({
+                [STORAGE_KEY]: DEFAULT_ENABLED,
+                [PLAYLIST_STORAGE_KEY]: DEFAULT_PLAYLIST_ENABLED
+            })
+            .then((result) => applyInitialSettings(result[STORAGE_KEY], result[PLAYLIST_STORAGE_KEY]))
+            .catch(() => applyInitialSettings(DEFAULT_ENABLED, DEFAULT_PLAYLIST_ENABLED));
     } else {
-        applyInitialSettings(DEFAULT_ENABLED);
+        applyInitialSettings(DEFAULT_ENABLED, DEFAULT_PLAYLIST_ENABLED);
     }
 
     if (typeof browser !== "undefined" && browser.storage && browser.storage.onChanged) {
         browser.storage.onChanged.addListener((changes, area) => {
             if (area !== "local") return;
-            if (!changes[STORAGE_KEY]) return;
-            setEnabled(changes[STORAGE_KEY].newValue);
+            if (changes[STORAGE_KEY]) {
+                setEnabled(changes[STORAGE_KEY].newValue);
+            }
+            if (changes[PLAYLIST_STORAGE_KEY]) {
+                setPlaylistEnabled(changes[PLAYLIST_STORAGE_KEY].newValue);
+            }
         });
     }
 
     window.addEventListener("pageshow", () => {
         scheduleSweep();
+        schedulePlaylistEnsure();
     });
 
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") {
             scheduleSweep();
+            schedulePlaylistEnsure();
         }
     });
+
+    document.addEventListener("yt-navigate-finish", schedulePlaylistEnsure);
+    document.addEventListener("yt-page-data-updated", schedulePlaylistEnsure);
+
+    schedulePlaylistEnsure();
 })();
