@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F36549F72F1F05470076EF1F /* YouTube Shorts Block Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F36549F62F1F05470076EF1F /* YouTube Shorts Block Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F3E136D82F22444A00124D7D /* ScrechKit in Frameworks */ = {isa = PBXBuildFile; productRef = F3E136D72F22444A00124D7D /* ScrechKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +82,7 @@
 		F36549D62F1F05460076EF1F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				F3E136D82F22444A00124D7D /* ScrechKit in Frameworks */,
 			);
 		};
 		F36549F32F1F05470076EF1F /* Frameworks */ = {
@@ -96,6 +98,7 @@
 			children = (
 				F36549DB2F1F05460076EF1F /* YouTube Shorts Block */,
 				F36549FA2F1F05470076EF1F /* YouTube Shorts Block Extension */,
+				F3E136D62F22444A00124D7D /* Frameworks */,
 				F36549DA2F1F05460076EF1F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -107,6 +110,13 @@
 				F36549F62F1F05470076EF1F /* YouTube Shorts Block Extension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F3E136D62F22444A00124D7D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -130,6 +140,9 @@
 				F36549DB2F1F05460076EF1F /* YouTube Shorts Block */,
 			);
 			name = "YouTube Shorts Block";
+			packageProductDependencies = (
+				F3E136D72F22444A00124D7D /* ScrechKit */,
+			);
 			productName = "YouTube Shorts Block";
 			productReference = F36549D92F1F05460076EF1F /* YouTube Shorts Block.app */;
 			productType = "com.apple.product-type.application";
@@ -179,6 +192,9 @@
 			);
 			mainGroup = F36549D02F1F05460076EF1F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F3E136D52F22444200124D7D /* XCRemoteSwiftPackageReference "ScrechKit" */,
+			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = F36549DA2F1F05460076EF1F /* Products */;
 			projectDirPath = "";
@@ -550,6 +566,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F3E136D52F22444200124D7D /* XCRemoteSwiftPackageReference "ScrechKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TopScrech/ScrechKit";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F3E136D72F22444A00124D7D /* ScrechKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F3E136D52F22444200124D7D /* XCRemoteSwiftPackageReference "ScrechKit" */;
+			productName = ScrechKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F36549D12F1F05460076EF1F /* Project object */;
 }
