@@ -23,6 +23,7 @@ struct WebView: UIViewRepresentable {
         let webView = WKWebView()
         webView.scrollView.isScrollEnabled = false
         load(webView)
+        
         return webView
     }
 
@@ -32,6 +33,7 @@ struct WebView: UIViewRepresentable {
 
     private func load(_ webView: WKWebView) {
         guard webView.url != url else { return }
+        
         let baseURL = url.deletingLastPathComponent()
         webView.loadFileURL(url, allowingReadAccessTo: baseURL)
     }
@@ -52,6 +54,7 @@ struct WebView: NSViewRepresentable {
 
     private func load(_ webView: WKWebView) {
         guard webView.url != url else { return }
+        
         let baseURL = url.deletingLastPathComponent()
         webView.loadFileURL(url, allowingReadAccessTo: baseURL)
     }

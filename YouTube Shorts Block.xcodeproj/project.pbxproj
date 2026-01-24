@@ -3,11 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 90;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		F36549F72F1F05470076EF1F /* YouTube Shorts Block Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F36549F62F1F05470076EF1F /* YouTube Shorts Block Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F3E136D82F22444A00124D7D /* ScrechKit in Frameworks */ = {isa = PBXBuildFile; productRef = F3E136D72F22444A00124D7D /* ScrechKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -23,14 +24,12 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		F3654A152F1F05470076EF1F /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 13;
+			dstSubfolder = PlugIns;
 			files = (
 				F36549F72F1F05470076EF1F /* YouTube Shorts Block Extension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -82,17 +81,14 @@
 /* Begin PBXFrameworksBuildPhase section */
 		F36549D62F1F05460076EF1F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
+				F3E136D82F22444A00124D7D /* ScrechKit in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F36549F32F1F05470076EF1F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -102,6 +98,7 @@
 			children = (
 				F36549DB2F1F05460076EF1F /* YouTube Shorts Block */,
 				F36549FA2F1F05470076EF1F /* YouTube Shorts Block Extension */,
+				F3E136D62F22444A00124D7D /* Frameworks */,
 				F36549DA2F1F05460076EF1F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -113,6 +110,13 @@
 				F36549F62F1F05470076EF1F /* YouTube Shorts Block Extension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F3E136D62F22444A00124D7D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -137,6 +141,7 @@
 			);
 			name = "YouTube Shorts Block";
 			packageProductDependencies = (
+				F3E136D72F22444A00124D7D /* ScrechKit */,
 			);
 			productName = "YouTube Shorts Block";
 			productReference = F36549D92F1F05460076EF1F /* YouTube Shorts Block.app */;
@@ -152,14 +157,10 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				F36549FA2F1F05470076EF1F /* YouTube Shorts Block Extension */,
 			);
 			name = "YouTube Shorts Block Extension";
-			packageProductDependencies = (
-			);
 			productName = "YouTube Shorts Block Extension";
 			productReference = F36549F62F1F05470076EF1F /* YouTube Shorts Block Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -191,7 +192,10 @@
 			);
 			mainGroup = F36549D02F1F05460076EF1F;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
+			packageReferences = (
+				F3E136D52F22444200124D7D /* XCRemoteSwiftPackageReference "ScrechKit" */,
+			);
+			preferredProjectObjectVersion = 90;
 			productRefGroup = F36549DA2F1F05460076EF1F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -205,34 +209,26 @@
 /* Begin PBXResourcesBuildPhase section */
 		F36549D72F1F05460076EF1F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F36549F42F1F05470076EF1F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		F36549D52F1F05460076EF1F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F36549F22F1F05470076EF1F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -245,12 +241,11 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		F3654A122F1F05470076EF1F /* Debug */ = {
+		F3654A122F1F05470076EF1F /* Debug configuration for PBXNativeTarget "YouTube Shorts Block Extension" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
 				DEVELOPMENT_TEAM = 8FQUA2F388;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -266,7 +261,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.9;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -284,16 +279,15 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		F3654A132F1F05470076EF1F /* Release */ = {
+		F3654A132F1F05470076EF1F /* Release configuration for PBXNativeTarget "YouTube Shorts Block Extension" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
 				DEVELOPMENT_TEAM = 8FQUA2F388;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -309,7 +303,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.9;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -327,18 +321,17 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
-		F3654A172F1F05470076EF1F /* Debug */ = {
+		F3654A172F1F05470076EF1F /* Debug configuration for PBXNativeTarget "YouTube Shorts Block" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
 				DEVELOPMENT_TEAM = 8FQUA2F388;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -346,6 +339,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "YouTube Shorts Block/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "YouTube Shorts Block";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -354,7 +348,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.9;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -374,18 +368,17 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		F3654A182F1F05470076EF1F /* Release */ = {
+		F3654A182F1F05470076EF1F /* Release configuration for PBXNativeTarget "YouTube Shorts Block" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0;
 				DEVELOPMENT_TEAM = 8FQUA2F388;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -393,6 +386,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "YouTube Shorts Block/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "YouTube Shorts Block";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -401,7 +395,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.9;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -421,11 +415,11 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
-		F3654A192F1F05470076EF1F /* Debug */ = {
+		F3654A192F1F05470076EF1F /* Debug configuration for PBXProject "YouTube Shorts Block" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -459,6 +453,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 0;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 8FQUA2F388;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -480,6 +475,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -489,7 +485,7 @@
 			};
 			name = Debug;
 		};
-		F3654A1A2F1F05470076EF1F /* Release */ = {
+		F3654A1A2F1F05470076EF1F /* Release configuration for PBXProject "YouTube Shorts Block" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -523,6 +519,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 8FQUA2F388;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -538,6 +535,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 26.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = auto;
@@ -552,31 +550,47 @@
 		F36549D42F1F05460076EF1F /* Build configuration list for PBXProject "YouTube Shorts Block" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F3654A192F1F05470076EF1F /* Debug */,
-				F3654A1A2F1F05470076EF1F /* Release */,
+				F3654A192F1F05470076EF1F /* Debug configuration for PBXProject "YouTube Shorts Block" */,
+				F3654A1A2F1F05470076EF1F /* Release configuration for PBXProject "YouTube Shorts Block" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		F3654A112F1F05470076EF1F /* Build configuration list for PBXNativeTarget "YouTube Shorts Block Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F3654A122F1F05470076EF1F /* Debug */,
-				F3654A132F1F05470076EF1F /* Release */,
+				F3654A122F1F05470076EF1F /* Debug configuration for PBXNativeTarget "YouTube Shorts Block Extension" */,
+				F3654A132F1F05470076EF1F /* Release configuration for PBXNativeTarget "YouTube Shorts Block Extension" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		F3654A162F1F05470076EF1F /* Build configuration list for PBXNativeTarget "YouTube Shorts Block" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F3654A172F1F05470076EF1F /* Debug */,
-				F3654A182F1F05470076EF1F /* Release */,
+				F3654A172F1F05470076EF1F /* Debug configuration for PBXNativeTarget "YouTube Shorts Block" */,
+				F3654A182F1F05470076EF1F /* Release configuration for PBXNativeTarget "YouTube Shorts Block" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F3E136D52F22444200124D7D /* XCRemoteSwiftPackageReference "ScrechKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TopScrech/ScrechKit";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F3E136D72F22444A00124D7D /* ScrechKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F3E136D52F22444200124D7D /* XCRemoteSwiftPackageReference "ScrechKit" */;
+			productName = ScrechKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F36549D12F1F05460076EF1F /* Project object */;
 }
