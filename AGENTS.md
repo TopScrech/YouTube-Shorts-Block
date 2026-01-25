@@ -9,8 +9,6 @@
 - `YouTube Shorts Block.xcodeproj/` is the Xcode project with shared schemes
 
 ## Build, Test, and Development Commands
-Use Xcode for day to day development, or use `xcodebuild` from the repo root
-
 ```sh
 xcodebuild -scheme "YouTube Shorts Block" -configuration Debug build
 ```
