@@ -36,6 +36,7 @@
 /* Begin PBXFileReference section */
 		F36549D92F1F05460076EF1F /* YouTube Shorts Block.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "YouTube Shorts Block.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F36549F62F1F05470076EF1F /* YouTube Shorts Block Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "YouTube Shorts Block Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F3A65AC12F29359B008354CC /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		F3B87A7B2F26DB4900421093 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -98,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				F3B87A7B2F26DB4900421093 /* AGENTS.md */,
+				F3A65AC12F29359B008354CC /* README.md */,
 				F36549DB2F1F05460076EF1F /* YouTube Shorts Block */,
 				F36549FA2F1F05470076EF1F /* YouTube Shorts Block Extension */,
 				F3E136D62F22444A00124D7D /* Frameworks */,
