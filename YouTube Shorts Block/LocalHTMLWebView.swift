@@ -7,10 +7,10 @@ struct LocalHTMLWebView: View {
     }
     
     var body: some View {
-        if let url = fileURL {
-            WebView(url: url)
+        if let fileURL {
+            WebView(url: fileURL)
         } else {
-            Text("Missing local content.")
+            Text("Missing local content")
         }
     }
 }
