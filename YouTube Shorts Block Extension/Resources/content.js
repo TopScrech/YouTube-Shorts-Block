@@ -7,8 +7,12 @@
     const DEFAULT_ENABLED = true;
     const PLAYLIST_STORAGE_KEY = "playlistButtonEnabled";
     const DEFAULT_PLAYLIST_ENABLED = true;
+    const LIKES_STORAGE_KEY = "hideLikesDislikes";
+    const DEFAULT_LIKES_HIDDEN = false;
     const PLAYLIST_BUTTON_ID = "yt-tweaks-playlist-return";
     const PLAYLIST_STYLE_ID = "yt-tweaks-playlist-return-style";
+    const LIKE_LABEL_RE = /\blike(d)?\b/i;
+    const DISLIKE_LABEL_RE = /\bdislike(d)?\b/i;
 
     const getText = (el) => (el && el.textContent ? el.textContent.trim() : "");
 
@@ -219,6 +223,95 @@
         return true;
     };
 
+    const hideLikesElement = (el) => {
+        if (!el) return false;
+        if (!el.isConnected) return false;
+        if (el.getAttribute("data-likes-hidden") === "true") return false;
+        const prevDisplay = el.style.getPropertyValue("display");
+        const prevDisplayPriority = el.style.getPropertyPriority("display");
+        const prevVisibility = el.style.getPropertyValue("content-visibility");
+        const prevVisibilityPriority = el.style.getPropertyPriority("content-visibility");
+        el.setAttribute("data-likes-hidden", "true");
+        el.setAttribute("data-likes-hidden-display", prevDisplay);
+        el.setAttribute("data-likes-hidden-display-priority", prevDisplayPriority);
+        el.setAttribute("data-likes-hidden-content-visibility", prevVisibility);
+        el.setAttribute("data-likes-hidden-content-visibility-priority", prevVisibilityPriority);
+        el.style.setProperty("display", "none", "important");
+        el.style.setProperty("content-visibility", "hidden", "important");
+        return true;
+    };
+
+    const restoreLikesElement = (el) => {
+        if (!el) return false;
+        if (el.getAttribute("data-likes-hidden") !== "true") return false;
+        const prevDisplay = el.getAttribute("data-likes-hidden-display") || "";
+        const prevDisplayPriority = el.getAttribute("data-likes-hidden-display-priority") || "";
+        const prevVisibility = el.getAttribute("data-likes-hidden-content-visibility") || "";
+        const prevVisibilityPriority = el.getAttribute("data-likes-hidden-content-visibility-priority") || "";
+        if (prevDisplay) {
+            el.style.setProperty("display", prevDisplay, prevDisplayPriority);
+        } else {
+            el.style.removeProperty("display");
+        }
+        if (prevVisibility) {
+            el.style.setProperty("content-visibility", prevVisibility, prevVisibilityPriority);
+        } else {
+            el.style.removeProperty("content-visibility");
+        }
+        el.removeAttribute("data-likes-hidden");
+        el.removeAttribute("data-likes-hidden-display");
+        el.removeAttribute("data-likes-hidden-display-priority");
+        el.removeAttribute("data-likes-hidden-content-visibility");
+        el.removeAttribute("data-likes-hidden-content-visibility-priority");
+        return true;
+    };
+
+    const restoreLikesDislikes = (root = document) => {
+        const hidden = root.querySelectorAll("[data-likes-hidden='true']");
+        hidden.forEach((el) => restoreLikesElement(el));
+    };
+
+    const isLikeDislikeLabel = (label) => {
+        if (!label) return false;
+        const trimmed = label.trim();
+        if (!trimmed) return false;
+        if (DISLIKE_LABEL_RE.test(trimmed)) return true;
+        return LIKE_LABEL_RE.test(trimmed);
+    };
+
+    const isLikeDislikeElement = (el) => {
+        if (!el) return false;
+        const labels = [
+            el.getAttribute && el.getAttribute("aria-label"),
+            el.getAttribute && el.getAttribute("title"),
+            el.getAttribute && el.getAttribute("data-tooltip-text"),
+            getText(el)
+        ];
+        for (const label of labels) {
+            if (isLikeDislikeLabel(label)) return true;
+        }
+        return false;
+    };
+
+    const hideLikesDislikes = (root = document) => {
+        const actionBars = root.querySelectorAll(
+            "ytd-menu-renderer, ytd-reel-player-overlay-renderer, ytd-reel-player-header-renderer, ytm-slim-video-action-bar-renderer, ytm-video-action-bar-renderer"
+        );
+        const targets = new Set();
+        actionBars.forEach((bar) => {
+            const labeled = bar.querySelectorAll("[aria-label], [title], [data-tooltip-text]");
+            labeled.forEach((el) => {
+                if (!isLikeDislikeElement(el)) return;
+                const container =
+                    el.closest(
+                        "ytd-segmented-like-dislike-button-renderer, ytd-like-button-renderer, ytd-dislike-button-renderer, ytd-toggle-button-renderer, ytm-like-button-renderer, ytm-dislike-button-renderer, ytm-toggle-button-renderer"
+                    ) || el;
+                targets.add(container);
+            });
+        });
+        targets.forEach((el) => hideLikesElement(el));
+    };
+
     const restoreShortsEverywhere = (root = document) => {
         const blocked = root.querySelectorAll("[data-shorts-blocked='true']");
         blocked.forEach((el) => restoreElement(el));
@@ -322,6 +415,7 @@
 
     let enabled = DEFAULT_ENABLED;
     let playlistEnabled = DEFAULT_PLAYLIST_ENABLED;
+    let likesHidden = DEFAULT_LIKES_HIDDEN;
     let documentReady = document.readyState !== "loading";
     let playlistEnsureQueued = false;
 
@@ -389,6 +483,7 @@
     };
 
     let sweepScheduled = false;
+    let likesSweepScheduled = false;
     let observerActive = false;
     let settingsLoaded = false;
 
@@ -413,6 +508,17 @@
         });
     };
 
+    const scheduleLikesSweep = () => {
+        if (!settingsLoaded || !likesHidden) return;
+        if (likesSweepScheduled) return;
+        likesSweepScheduled = true;
+        requestAnimationFrame(() => {
+            likesSweepScheduled = false;
+            if (!likesHidden) return;
+            hideLikesDislikes(document);
+        });
+    };
+
     const observer = new MutationObserver((mutations) => {
         if (mutations.length) {
             schedulePlaylistEnsure();
@@ -421,11 +527,14 @@
             if (mutation.type === "childList") {
                 if (mutation.addedNodes.length) {
                     scheduleSweep();
+                    scheduleLikesSweep();
                 }
             } else if (mutation.type === "attributes") {
                 scheduleSweep();
+                scheduleLikesSweep();
             } else if (mutation.type === "characterData") {
                 scheduleSweep();
+                scheduleLikesSweep();
             }
         }
     });
@@ -451,14 +560,21 @@
     };
 
     const start = () => {
-        if (!enabled) return;
-        removeShortsEverywhere(document);
+        if (enabled) {
+            removeShortsEverywhere(document);
+        }
+        if (likesHidden) {
+            hideLikesDislikes(document);
+        }
         schedulePlaylistEnsure();
-        startObserver();
+        if (enabled || likesHidden) {
+            startObserver();
+        }
     };
 
     const maybeStart = () => {
-        if (!documentReady || !settingsLoaded || !enabled) return;
+        if (!documentReady || !settingsLoaded) return;
+        if (!enabled && !likesHidden) return;
         start();
     };
 
@@ -471,9 +587,11 @@
                 start();
             }
         } else {
-            stopObserver();
             restoreShortsEverywhere(document);
             ensurePlaylistButton();
+            if (!likesHidden) {
+                stopObserver();
+            }
         }
     };
 
@@ -484,15 +602,37 @@
         schedulePlaylistEnsure();
     };
 
-    const applyInitialSettings = (initialEnabled, initialPlaylistEnabled) => {
+    const setLikesHidden = (nextHidden) => {
+        const normalized = nextHidden === true;
+        if (likesHidden === normalized) return;
+        likesHidden = normalized;
+        if (likesHidden) {
+            if (documentReady) {
+                start();
+            }
+        } else {
+            restoreLikesDislikes(document);
+            if (!enabled) {
+                stopObserver();
+            }
+        }
+    };
+
+    const applyInitialSettings = (initialEnabled, initialPlaylistEnabled, initialLikesHidden) => {
         enabled = initialEnabled !== false;
         playlistEnabled = initialPlaylistEnabled !== false;
+        likesHidden = initialLikesHidden === true;
         settingsLoaded = true;
-        if (enabled) {
+        if (enabled || likesHidden) {
             maybeStart();
         } else {
             stopObserver();
+        }
+        if (!enabled) {
             restoreShortsEverywhere(document);
+        }
+        if (!likesHidden) {
+            restoreLikesDislikes(document);
         }
         schedulePlaylistEnsure();
     };
@@ -512,12 +652,13 @@
         storage
             .get({
                 [STORAGE_KEY]: DEFAULT_ENABLED,
-                [PLAYLIST_STORAGE_KEY]: DEFAULT_PLAYLIST_ENABLED
+                [PLAYLIST_STORAGE_KEY]: DEFAULT_PLAYLIST_ENABLED,
+                [LIKES_STORAGE_KEY]: DEFAULT_LIKES_HIDDEN
             })
-            .then((result) => applyInitialSettings(result[STORAGE_KEY], result[PLAYLIST_STORAGE_KEY]))
-            .catch(() => applyInitialSettings(DEFAULT_ENABLED, DEFAULT_PLAYLIST_ENABLED));
+            .then((result) => applyInitialSettings(result[STORAGE_KEY], result[PLAYLIST_STORAGE_KEY], result[LIKES_STORAGE_KEY]))
+            .catch(() => applyInitialSettings(DEFAULT_ENABLED, DEFAULT_PLAYLIST_ENABLED, DEFAULT_LIKES_HIDDEN));
     } else {
-        applyInitialSettings(DEFAULT_ENABLED, DEFAULT_PLAYLIST_ENABLED);
+        applyInitialSettings(DEFAULT_ENABLED, DEFAULT_PLAYLIST_ENABLED, DEFAULT_LIKES_HIDDEN);
     }
 
     if (typeof browser !== "undefined" && browser.storage && browser.storage.onChanged) {
@@ -529,23 +670,34 @@
             if (changes[PLAYLIST_STORAGE_KEY]) {
                 setPlaylistEnabled(changes[PLAYLIST_STORAGE_KEY].newValue);
             }
+            if (changes[LIKES_STORAGE_KEY]) {
+                setLikesHidden(changes[LIKES_STORAGE_KEY].newValue);
+            }
         });
     }
 
     window.addEventListener("pageshow", () => {
         scheduleSweep();
+        scheduleLikesSweep();
         schedulePlaylistEnsure();
     });
 
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") {
             scheduleSweep();
+            scheduleLikesSweep();
             schedulePlaylistEnsure();
         }
     });
 
-    document.addEventListener("yt-navigate-finish", schedulePlaylistEnsure);
-    document.addEventListener("yt-page-data-updated", schedulePlaylistEnsure);
+    const handleYouTubeNavigate = () => {
+        scheduleLikesSweep();
+        schedulePlaylistEnsure();
+    };
+
+    document.addEventListener("yt-navigate-finish", handleYouTubeNavigate);
+    document.addEventListener("yt-page-data-updated", handleYouTubeNavigate);
 
     schedulePlaylistEnsure();
+    scheduleLikesSweep();
 })();

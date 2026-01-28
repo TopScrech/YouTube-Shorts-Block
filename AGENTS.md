@@ -23,4 +23,4 @@ xcodebuild -scheme "YouTube Shorts Block" -destination 'platform=iOS Simulator,n
 - App and extension settings live in `Info.plist` and `manifest.json`, keep changes minimal and reviewed
 
 ## Agent Specific Notes
-- Do not build or create unit tests unless requested
+- Implement features for both desktop and mobile version of youtube's website
