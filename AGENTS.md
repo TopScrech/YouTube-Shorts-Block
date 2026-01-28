@@ -1,5 +1,7 @@
 # Repository Guidelines
 
+This project is a Safari Extension for hiding distracting YouTube features
+
 ## Project Structure & Module Organization
 - `YouTube Shorts Block/` holds the main app source, SwiftUI views, and app resources
 - `YouTube Shorts Block/Resources/` includes local HTML and CSS used by the app
