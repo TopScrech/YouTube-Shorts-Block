@@ -1,4 +1,4 @@
-# YouTube Shorts Block
+# Focus mode for YouTube
 
 ## Features
 - Hide shorts in the nav bar, home page and in channel sections
