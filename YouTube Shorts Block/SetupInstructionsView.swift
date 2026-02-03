@@ -3,8 +3,8 @@ import ScrechKit
 struct SetupInstructionsView: View {
     private let steps = [
         "Open Settings > Safari > Extensions",
-        "Tap YouTube Shorts Block and turn on \"Allow Extension\"",
-        "Open Safari, go to YouTube, then tap the AA button > Extensions > YouTube Shorts Block and allow it for this website"
+        "Tap Focus mode for YouTube and turn on \"Allow Extension\"",
+        "Open Safari, go to YouTube, then tap the AA button > Extensions > Focus mode for YouTube and allow it for this website"
     ]
     
     var body: some View {
@@ -13,7 +13,7 @@ struct SetupInstructionsView: View {
                 appIcon
                 
                 VStack(spacing: 8) {
-                    Text("YouTube Shorts Block")
+                    Text("Focus mode for YouTube")
                         .title()
                     
                     Text("Enable the Safari extension:")
@@ -51,7 +51,7 @@ struct SetupInstructionsView: View {
             .scaledToFit()
             .frame(96)
             .clipShape(.rect(cornerRadius: 16))
-            .accessibilityLabel("YouTube Shorts Block icon")
+            .accessibilityLabel("Focus mode for YouTube icon")
     }
     
     @ViewBuilder

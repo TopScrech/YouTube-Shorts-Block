@@ -1,5 +1,7 @@
 # Repository Guidelines
 
+This project is a Safari Extension for hiding distracting YouTube features
+
 ## Project Structure & Module Organization
 - `YouTube Shorts Block/` holds the main app source, SwiftUI views, and app resources
 - `YouTube Shorts Block/Resources/` includes local HTML and CSS used by the app
@@ -23,4 +25,4 @@ xcodebuild -scheme "YouTube Shorts Block" -destination 'platform=iOS Simulator,n
 - App and extension settings live in `Info.plist` and `manifest.json`, keep changes minimal and reviewed
 
 ## Agent Specific Notes
-- Do not build or create unit tests unless requested
+- Implement features for both desktop and mobile version of youtube's website
