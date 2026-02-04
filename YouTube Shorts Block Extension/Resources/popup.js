@@ -6,11 +6,14 @@ const LIKES_STORAGE_KEY = "hideLikesDislikes";
 const DEFAULT_LIKES_HIDDEN = false;
 const LIKE_COUNT_STORAGE_KEY = "hideLikeCount";
 const DEFAULT_LIKE_COUNT_HIDDEN = false;
+const COMMENTS_STORAGE_KEY = "hideComments";
+const DEFAULT_COMMENTS_HIDDEN = false;
 
 const toggle = document.getElementById("enabled-toggle");
 const playlistToggle = document.getElementById("playlist-toggle");
 const likesToggle = document.getElementById("likes-toggle");
 const likeCountToggle = document.getElementById("like-count-toggle");
+const commentsToggle = document.getElementById("comments-toggle");
 
 const storage = (() => {
     try {
@@ -36,12 +39,17 @@ const setLikeCountStatus = (hidden) => {
     likeCountToggle.checked = hidden;
 };
 
+const setCommentsStatus = (hidden) => {
+    commentsToggle.checked = hidden;
+};
+
 const loadState = async () => {
     if (!storage) {
         setStatus(DEFAULT_ENABLED);
         setPlaylistStatus(DEFAULT_PLAYLIST_ENABLED);
         setLikesStatus(DEFAULT_LIKES_HIDDEN);
         setLikeCountStatus(DEFAULT_LIKE_COUNT_HIDDEN);
+        setCommentsStatus(DEFAULT_COMMENTS_HIDDEN);
         return;
     }
     try {
@@ -49,17 +57,20 @@ const loadState = async () => {
             [STORAGE_KEY]: DEFAULT_ENABLED,
             [PLAYLIST_STORAGE_KEY]: DEFAULT_PLAYLIST_ENABLED,
             [LIKES_STORAGE_KEY]: DEFAULT_LIKES_HIDDEN,
-            [LIKE_COUNT_STORAGE_KEY]: DEFAULT_LIKE_COUNT_HIDDEN
+            [LIKE_COUNT_STORAGE_KEY]: DEFAULT_LIKE_COUNT_HIDDEN,
+            [COMMENTS_STORAGE_KEY]: DEFAULT_COMMENTS_HIDDEN
         });
         setStatus(result[STORAGE_KEY] !== false);
         setPlaylistStatus(result[PLAYLIST_STORAGE_KEY] !== false);
         setLikesStatus(result[LIKES_STORAGE_KEY] === true);
         setLikeCountStatus(result[LIKE_COUNT_STORAGE_KEY] === true);
+        setCommentsStatus(result[COMMENTS_STORAGE_KEY] === true);
     } catch (error) {
         setStatus(DEFAULT_ENABLED);
         setPlaylistStatus(DEFAULT_PLAYLIST_ENABLED);
         setLikesStatus(DEFAULT_LIKES_HIDDEN);
         setLikeCountStatus(DEFAULT_LIKE_COUNT_HIDDEN);
+        setCommentsStatus(DEFAULT_COMMENTS_HIDDEN);
     }
 };
 
@@ -102,6 +113,17 @@ likeCountToggle.addEventListener("change", async () => {
     if (!storage) return;
     try {
         await storage.set({ [LIKE_COUNT_STORAGE_KEY]: hidden });
+    } catch (error) {
+        // Ignore storage errors in the popup.
+    }
+});
+
+commentsToggle.addEventListener("change", async () => {
+    const hidden = commentsToggle.checked;
+    setCommentsStatus(hidden);
+    if (!storage) return;
+    try {
+        await storage.set({ [COMMENTS_STORAGE_KEY]: hidden });
     } catch (error) {
         // Ignore storage errors in the popup.
     }
