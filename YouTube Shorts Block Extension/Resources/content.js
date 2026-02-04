@@ -9,10 +9,13 @@
     const DEFAULT_PLAYLIST_ENABLED = true;
     const LIKES_STORAGE_KEY = "hideLikesDislikes";
     const DEFAULT_LIKES_HIDDEN = false;
+    const LIKE_COUNT_STORAGE_KEY = "hideLikeCount";
+    const DEFAULT_LIKE_COUNT_HIDDEN = false;
     const PLAYLIST_BUTTON_ID = "yt-tweaks-playlist-return";
     const PLAYLIST_STYLE_ID = "yt-tweaks-playlist-return-style";
     const LIKE_LABEL_RE = /\blike(d)?\b/i;
     const DISLIKE_LABEL_RE = /\bdislike(d)?\b/i;
+    const LIKE_COUNT_TEXT_RE = /\d/;
 
     const getText = (el) => (el && el.textContent ? el.textContent.trim() : "");
 
@@ -279,6 +282,14 @@
         return LIKE_LABEL_RE.test(trimmed);
     };
 
+    const isLikeLabel = (label) => {
+        if (!label) return false;
+        const trimmed = label.trim();
+        if (!trimmed) return false;
+        if (DISLIKE_LABEL_RE.test(trimmed)) return false;
+        return LIKE_LABEL_RE.test(trimmed);
+    };
+
     const isLikeDislikeElement = (el) => {
         if (!el) return false;
         const labels = [
@@ -291,6 +302,68 @@
             if (isLikeDislikeLabel(label)) return true;
         }
         return false;
+    };
+
+    const isLikeElement = (el) => {
+        if (!el) return false;
+        const labels = [
+            el.getAttribute && el.getAttribute("aria-label"),
+            el.getAttribute && el.getAttribute("title"),
+            el.getAttribute && el.getAttribute("data-tooltip-text"),
+            getText(el)
+        ];
+        for (const label of labels) {
+            if (isLikeLabel(label)) return true;
+        }
+        return false;
+    };
+
+    const hideLikeCountElement = (el) => {
+        if (!el) return false;
+        if (!el.isConnected) return false;
+        if (el.getAttribute("data-like-count-hidden") === "true") return false;
+        const prevDisplay = el.style.getPropertyValue("display");
+        const prevDisplayPriority = el.style.getPropertyPriority("display");
+        const prevVisibility = el.style.getPropertyValue("content-visibility");
+        const prevVisibilityPriority = el.style.getPropertyPriority("content-visibility");
+        el.setAttribute("data-like-count-hidden", "true");
+        el.setAttribute("data-like-count-hidden-display", prevDisplay);
+        el.setAttribute("data-like-count-hidden-display-priority", prevDisplayPriority);
+        el.setAttribute("data-like-count-hidden-content-visibility", prevVisibility);
+        el.setAttribute("data-like-count-hidden-content-visibility-priority", prevVisibilityPriority);
+        el.style.setProperty("display", "none", "important");
+        el.style.setProperty("content-visibility", "hidden", "important");
+        return true;
+    };
+
+    const restoreLikeCountElement = (el) => {
+        if (!el) return false;
+        if (el.getAttribute("data-like-count-hidden") !== "true") return false;
+        const prevDisplay = el.getAttribute("data-like-count-hidden-display") || "";
+        const prevDisplayPriority = el.getAttribute("data-like-count-hidden-display-priority") || "";
+        const prevVisibility = el.getAttribute("data-like-count-hidden-content-visibility") || "";
+        const prevVisibilityPriority = el.getAttribute("data-like-count-hidden-content-visibility-priority") || "";
+        if (prevDisplay) {
+            el.style.setProperty("display", prevDisplay, prevDisplayPriority);
+        } else {
+            el.style.removeProperty("display");
+        }
+        if (prevVisibility) {
+            el.style.setProperty("content-visibility", prevVisibility, prevVisibilityPriority);
+        } else {
+            el.style.removeProperty("content-visibility");
+        }
+        el.removeAttribute("data-like-count-hidden");
+        el.removeAttribute("data-like-count-hidden-display");
+        el.removeAttribute("data-like-count-hidden-display-priority");
+        el.removeAttribute("data-like-count-hidden-content-visibility");
+        el.removeAttribute("data-like-count-hidden-content-visibility-priority");
+        return true;
+    };
+
+    const restoreLikeCounts = (root = document) => {
+        const hidden = root.querySelectorAll("[data-like-count-hidden='true']");
+        hidden.forEach((el) => restoreLikeCountElement(el));
     };
 
     const hideLikesDislikes = (root = document) => {
@@ -310,6 +383,38 @@
             });
         });
         targets.forEach((el) => hideLikesElement(el));
+    };
+
+    const hideLikeCounts = (root = document) => {
+        const actionBars = root.querySelectorAll(
+            "ytd-menu-renderer, ytd-reel-player-overlay-renderer, ytd-reel-player-header-renderer, ytm-slim-video-action-bar-renderer, ytm-video-action-bar-renderer"
+        );
+        const targets = new Set();
+        actionBars.forEach((bar) => {
+            const labeled = bar.querySelectorAll("[aria-label], [title], [data-tooltip-text]");
+            labeled.forEach((el) => {
+                if (!isLikeElement(el)) return;
+                const container =
+                    el.closest(
+                        "ytd-like-button-renderer, ytm-like-button-renderer, ytd-toggle-button-renderer, ytm-toggle-button-renderer, button"
+                    ) || el;
+                targets.add(container);
+            });
+        });
+        targets.forEach((button) => {
+            if (!button || !button.querySelectorAll) return;
+            const candidates = button.querySelectorAll(
+                "yt-formatted-string, #text, .yt-spec-button-shape-next__button-text-content, .button-text, span, div"
+            );
+            candidates.forEach((candidate) => {
+                if (!candidate) return;
+                if (candidate.childElementCount > 0 && candidate.tagName !== "YT-FORMATTED-STRING") return;
+                const text = getText(candidate);
+                if (!text) return;
+                if (!LIKE_COUNT_TEXT_RE.test(text)) return;
+                hideLikeCountElement(candidate);
+            });
+        });
     };
 
     const restoreShortsEverywhere = (root = document) => {
@@ -416,6 +521,7 @@
     let enabled = DEFAULT_ENABLED;
     let playlistEnabled = DEFAULT_PLAYLIST_ENABLED;
     let likesHidden = DEFAULT_LIKES_HIDDEN;
+    let likeCountHidden = DEFAULT_LIKE_COUNT_HIDDEN;
     let documentReady = document.readyState !== "loading";
     let playlistEnsureQueued = false;
 
@@ -484,6 +590,7 @@
 
     let sweepScheduled = false;
     let likesSweepScheduled = false;
+    let likeCountSweepScheduled = false;
     let observerActive = false;
     let settingsLoaded = false;
 
@@ -519,6 +626,17 @@
         });
     };
 
+    const scheduleLikeCountSweep = () => {
+        if (!settingsLoaded || !likeCountHidden) return;
+        if (likeCountSweepScheduled) return;
+        likeCountSweepScheduled = true;
+        requestAnimationFrame(() => {
+            likeCountSweepScheduled = false;
+            if (!likeCountHidden) return;
+            hideLikeCounts(document);
+        });
+    };
+
     const observer = new MutationObserver((mutations) => {
         if (mutations.length) {
             schedulePlaylistEnsure();
@@ -528,13 +646,16 @@
                 if (mutation.addedNodes.length) {
                     scheduleSweep();
                     scheduleLikesSweep();
+                    scheduleLikeCountSweep();
                 }
             } else if (mutation.type === "attributes") {
                 scheduleSweep();
                 scheduleLikesSweep();
+                scheduleLikeCountSweep();
             } else if (mutation.type === "characterData") {
                 scheduleSweep();
                 scheduleLikesSweep();
+                scheduleLikeCountSweep();
             }
         }
     });
@@ -566,15 +687,18 @@
         if (likesHidden) {
             hideLikesDislikes(document);
         }
+        if (likeCountHidden) {
+            hideLikeCounts(document);
+        }
         schedulePlaylistEnsure();
-        if (enabled || likesHidden) {
+        if (enabled || likesHidden || likeCountHidden) {
             startObserver();
         }
     };
 
     const maybeStart = () => {
         if (!documentReady || !settingsLoaded) return;
-        if (!enabled && !likesHidden) return;
+        if (!enabled && !likesHidden && !likeCountHidden) return;
         start();
     };
 
@@ -589,7 +713,7 @@
         } else {
             restoreShortsEverywhere(document);
             ensurePlaylistButton();
-            if (!likesHidden) {
+            if (!likesHidden && !likeCountHidden) {
                 stopObserver();
             }
         }
@@ -612,18 +736,38 @@
             }
         } else {
             restoreLikesDislikes(document);
-            if (!enabled) {
+            if (likeCountHidden) {
+                scheduleLikeCountSweep();
+            }
+            if (!enabled && !likeCountHidden) {
                 stopObserver();
             }
         }
     };
 
-    const applyInitialSettings = (initialEnabled, initialPlaylistEnabled, initialLikesHidden) => {
+    const setLikeCountHidden = (nextHidden) => {
+        const normalized = nextHidden === true;
+        if (likeCountHidden === normalized) return;
+        likeCountHidden = normalized;
+        if (likeCountHidden) {
+            if (documentReady) {
+                start();
+            }
+        } else {
+            restoreLikeCounts(document);
+            if (!enabled && !likesHidden) {
+                stopObserver();
+            }
+        }
+    };
+
+    const applyInitialSettings = (initialEnabled, initialPlaylistEnabled, initialLikesHidden, initialLikeCountHidden) => {
         enabled = initialEnabled !== false;
         playlistEnabled = initialPlaylistEnabled !== false;
         likesHidden = initialLikesHidden === true;
+        likeCountHidden = initialLikeCountHidden === true;
         settingsLoaded = true;
-        if (enabled || likesHidden) {
+        if (enabled || likesHidden || likeCountHidden) {
             maybeStart();
         } else {
             stopObserver();
@@ -633,6 +777,9 @@
         }
         if (!likesHidden) {
             restoreLikesDislikes(document);
+        }
+        if (!likeCountHidden) {
+            restoreLikeCounts(document);
         }
         schedulePlaylistEnsure();
     };
@@ -653,12 +800,20 @@
             .get({
                 [STORAGE_KEY]: DEFAULT_ENABLED,
                 [PLAYLIST_STORAGE_KEY]: DEFAULT_PLAYLIST_ENABLED,
-                [LIKES_STORAGE_KEY]: DEFAULT_LIKES_HIDDEN
+                [LIKES_STORAGE_KEY]: DEFAULT_LIKES_HIDDEN,
+                [LIKE_COUNT_STORAGE_KEY]: DEFAULT_LIKE_COUNT_HIDDEN
             })
-            .then((result) => applyInitialSettings(result[STORAGE_KEY], result[PLAYLIST_STORAGE_KEY], result[LIKES_STORAGE_KEY]))
-            .catch(() => applyInitialSettings(DEFAULT_ENABLED, DEFAULT_PLAYLIST_ENABLED, DEFAULT_LIKES_HIDDEN));
+            .then((result) =>
+                applyInitialSettings(
+                    result[STORAGE_KEY],
+                    result[PLAYLIST_STORAGE_KEY],
+                    result[LIKES_STORAGE_KEY],
+                    result[LIKE_COUNT_STORAGE_KEY]
+                )
+            )
+            .catch(() => applyInitialSettings(DEFAULT_ENABLED, DEFAULT_PLAYLIST_ENABLED, DEFAULT_LIKES_HIDDEN, DEFAULT_LIKE_COUNT_HIDDEN));
     } else {
-        applyInitialSettings(DEFAULT_ENABLED, DEFAULT_PLAYLIST_ENABLED, DEFAULT_LIKES_HIDDEN);
+        applyInitialSettings(DEFAULT_ENABLED, DEFAULT_PLAYLIST_ENABLED, DEFAULT_LIKES_HIDDEN, DEFAULT_LIKE_COUNT_HIDDEN);
     }
 
     if (typeof browser !== "undefined" && browser.storage && browser.storage.onChanged) {
@@ -673,12 +828,16 @@
             if (changes[LIKES_STORAGE_KEY]) {
                 setLikesHidden(changes[LIKES_STORAGE_KEY].newValue);
             }
+            if (changes[LIKE_COUNT_STORAGE_KEY]) {
+                setLikeCountHidden(changes[LIKE_COUNT_STORAGE_KEY].newValue);
+            }
         });
     }
 
     window.addEventListener("pageshow", () => {
         scheduleSweep();
         scheduleLikesSweep();
+        scheduleLikeCountSweep();
         schedulePlaylistEnsure();
     });
 
@@ -686,12 +845,14 @@
         if (document.visibilityState === "visible") {
             scheduleSweep();
             scheduleLikesSweep();
+            scheduleLikeCountSweep();
             schedulePlaylistEnsure();
         }
     });
 
     const handleYouTubeNavigate = () => {
         scheduleLikesSweep();
+        scheduleLikeCountSweep();
         schedulePlaylistEnsure();
     };
 
@@ -700,4 +861,5 @@
 
     schedulePlaylistEnsure();
     scheduleLikesSweep();
+    scheduleLikeCountSweep();
 })();

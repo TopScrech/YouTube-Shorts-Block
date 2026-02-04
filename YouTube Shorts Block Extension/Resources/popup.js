@@ -4,10 +4,13 @@ const PLAYLIST_STORAGE_KEY = "playlistButtonEnabled";
 const DEFAULT_PLAYLIST_ENABLED = true;
 const LIKES_STORAGE_KEY = "hideLikesDislikes";
 const DEFAULT_LIKES_HIDDEN = false;
+const LIKE_COUNT_STORAGE_KEY = "hideLikeCount";
+const DEFAULT_LIKE_COUNT_HIDDEN = false;
 
 const toggle = document.getElementById("enabled-toggle");
 const playlistToggle = document.getElementById("playlist-toggle");
 const likesToggle = document.getElementById("likes-toggle");
+const likeCountToggle = document.getElementById("like-count-toggle");
 
 const storage = (() => {
     try {
@@ -29,26 +32,34 @@ const setLikesStatus = (hidden) => {
     likesToggle.checked = hidden;
 };
 
+const setLikeCountStatus = (hidden) => {
+    likeCountToggle.checked = hidden;
+};
+
 const loadState = async () => {
     if (!storage) {
         setStatus(DEFAULT_ENABLED);
         setPlaylistStatus(DEFAULT_PLAYLIST_ENABLED);
         setLikesStatus(DEFAULT_LIKES_HIDDEN);
+        setLikeCountStatus(DEFAULT_LIKE_COUNT_HIDDEN);
         return;
     }
     try {
         const result = await storage.get({
             [STORAGE_KEY]: DEFAULT_ENABLED,
             [PLAYLIST_STORAGE_KEY]: DEFAULT_PLAYLIST_ENABLED,
-            [LIKES_STORAGE_KEY]: DEFAULT_LIKES_HIDDEN
+            [LIKES_STORAGE_KEY]: DEFAULT_LIKES_HIDDEN,
+            [LIKE_COUNT_STORAGE_KEY]: DEFAULT_LIKE_COUNT_HIDDEN
         });
         setStatus(result[STORAGE_KEY] !== false);
         setPlaylistStatus(result[PLAYLIST_STORAGE_KEY] !== false);
         setLikesStatus(result[LIKES_STORAGE_KEY] === true);
+        setLikeCountStatus(result[LIKE_COUNT_STORAGE_KEY] === true);
     } catch (error) {
         setStatus(DEFAULT_ENABLED);
         setPlaylistStatus(DEFAULT_PLAYLIST_ENABLED);
         setLikesStatus(DEFAULT_LIKES_HIDDEN);
+        setLikeCountStatus(DEFAULT_LIKE_COUNT_HIDDEN);
     }
 };
 
@@ -80,6 +91,17 @@ likesToggle.addEventListener("change", async () => {
     if (!storage) return;
     try {
         await storage.set({ [LIKES_STORAGE_KEY]: hidden });
+    } catch (error) {
+        // Ignore storage errors in the popup.
+    }
+});
+
+likeCountToggle.addEventListener("change", async () => {
+    const hidden = likeCountToggle.checked;
+    setLikeCountStatus(hidden);
+    if (!storage) return;
+    try {
+        await storage.set({ [LIKE_COUNT_STORAGE_KEY]: hidden });
     } catch (error) {
         // Ignore storage errors in the popup.
     }
