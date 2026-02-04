@@ -8,12 +8,15 @@ const LIKE_COUNT_STORAGE_KEY = "hideLikeCount";
 const DEFAULT_LIKE_COUNT_HIDDEN = false;
 const COMMENTS_STORAGE_KEY = "hideComments";
 const DEFAULT_COMMENTS_HIDDEN = false;
+const SUBSCRIBER_COUNT_STORAGE_KEY = "hideSubscriberCount";
+const DEFAULT_SUBSCRIBER_COUNT_HIDDEN = false;
 
 const toggle = document.getElementById("enabled-toggle");
 const playlistToggle = document.getElementById("playlist-toggle");
 const likesToggle = document.getElementById("likes-toggle");
 const likeCountToggle = document.getElementById("like-count-toggle");
 const commentsToggle = document.getElementById("comments-toggle");
+const subscriberCountToggle = document.getElementById("subscriber-count-toggle");
 
 const storage = (() => {
     try {
@@ -43,6 +46,10 @@ const setCommentsStatus = (hidden) => {
     commentsToggle.checked = hidden;
 };
 
+const setSubscriberCountStatus = (hidden) => {
+    subscriberCountToggle.checked = hidden;
+};
+
 const loadState = async () => {
     if (!storage) {
         setStatus(DEFAULT_ENABLED);
@@ -50,6 +57,7 @@ const loadState = async () => {
         setLikesStatus(DEFAULT_LIKES_HIDDEN);
         setLikeCountStatus(DEFAULT_LIKE_COUNT_HIDDEN);
         setCommentsStatus(DEFAULT_COMMENTS_HIDDEN);
+        setSubscriberCountStatus(DEFAULT_SUBSCRIBER_COUNT_HIDDEN);
         return;
     }
     try {
@@ -58,19 +66,22 @@ const loadState = async () => {
             [PLAYLIST_STORAGE_KEY]: DEFAULT_PLAYLIST_ENABLED,
             [LIKES_STORAGE_KEY]: DEFAULT_LIKES_HIDDEN,
             [LIKE_COUNT_STORAGE_KEY]: DEFAULT_LIKE_COUNT_HIDDEN,
-            [COMMENTS_STORAGE_KEY]: DEFAULT_COMMENTS_HIDDEN
+            [COMMENTS_STORAGE_KEY]: DEFAULT_COMMENTS_HIDDEN,
+            [SUBSCRIBER_COUNT_STORAGE_KEY]: DEFAULT_SUBSCRIBER_COUNT_HIDDEN
         });
         setStatus(result[STORAGE_KEY] !== false);
         setPlaylistStatus(result[PLAYLIST_STORAGE_KEY] !== false);
         setLikesStatus(result[LIKES_STORAGE_KEY] === true);
         setLikeCountStatus(result[LIKE_COUNT_STORAGE_KEY] === true);
         setCommentsStatus(result[COMMENTS_STORAGE_KEY] === true);
+        setSubscriberCountStatus(result[SUBSCRIBER_COUNT_STORAGE_KEY] === true);
     } catch (error) {
         setStatus(DEFAULT_ENABLED);
         setPlaylistStatus(DEFAULT_PLAYLIST_ENABLED);
         setLikesStatus(DEFAULT_LIKES_HIDDEN);
         setLikeCountStatus(DEFAULT_LIKE_COUNT_HIDDEN);
         setCommentsStatus(DEFAULT_COMMENTS_HIDDEN);
+        setSubscriberCountStatus(DEFAULT_SUBSCRIBER_COUNT_HIDDEN);
     }
 };
 
@@ -124,6 +135,17 @@ commentsToggle.addEventListener("change", async () => {
     if (!storage) return;
     try {
         await storage.set({ [COMMENTS_STORAGE_KEY]: hidden });
+    } catch (error) {
+        // Ignore storage errors in the popup.
+    }
+});
+
+subscriberCountToggle.addEventListener("change", async () => {
+    const hidden = subscriberCountToggle.checked;
+    setSubscriberCountStatus(hidden);
+    if (!storage) return;
+    try {
+        await storage.set({ [SUBSCRIBER_COUNT_STORAGE_KEY]: hidden });
     } catch (error) {
         // Ignore storage errors in the popup.
     }

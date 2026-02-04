@@ -13,12 +13,16 @@
     const DEFAULT_LIKE_COUNT_HIDDEN = false;
     const COMMENTS_STORAGE_KEY = "hideComments";
     const DEFAULT_COMMENTS_HIDDEN = false;
+    const SUBSCRIBER_COUNT_STORAGE_KEY = "hideSubscriberCount";
+    const DEFAULT_SUBSCRIBER_COUNT_HIDDEN = false;
     const PLAYLIST_BUTTON_ID = "yt-tweaks-playlist-return";
     const PLAYLIST_STYLE_ID = "yt-tweaks-playlist-return-style";
     const LIKE_LABEL_RE = /\blike(d)?\b/i;
     const DISLIKE_LABEL_RE = /\bdislike(d)?\b/i;
     const LIKE_COUNT_TEXT_RE = /\d/;
     const COMMENT_ENTRY_TEXT_RE = /\bcomments?\b/i;
+    const SUBSCRIBER_LABEL_RE =
+        /\b(subscribers?|subs|abonnees?|abonnent(en)?|suscriptores?|inscritos?|iscritti)\b/i;
     const COMMENT_SECTION_SELECTOR =
         "ytd-comments#comments," +
         " ytd-comments," +
@@ -36,6 +40,50 @@
         " ytm-comments-entry-point-header-renderer," +
         " ytm-comment-entry-point-renderer," +
         " ytm-engagement-panel-section-list-renderer[target-id='comments-entry-point']";
+    const SUBSCRIBER_COUNT_SELECTOR =
+        "#subscriber-count," +
+        " #subscribers," +
+        " .subscriber-count," +
+        " ytd-video-owner-renderer #subscriber-count," +
+        " ytd-video-owner-renderer #subscribers," +
+        " ytd-channel-name #subscriber-count," +
+        " ytd-channel-name #subscribers," +
+        " ytd-c4-tabbed-header-renderer #subscriber-count," +
+        " ytd-channel-header-renderer #subscriber-count," +
+        " ytd-immersive-header-renderer #subscriber-count," +
+        " ytd-channel-tagline-renderer #subscriber-count," +
+        " ytd-channel-renderer #subscribers," +
+        " ytd-grid-channel-renderer #subscribers," +
+        " ytd-compact-channel-renderer #subscribers," +
+        " ytd-mini-channel-renderer #subscribers," +
+        " ytm-subscribe-button-renderer .subscriber-count," +
+        " ytm-channel-header-renderer .subscriber-count," +
+        " ytm-video-owner-renderer .subscriber-count," +
+        " ytm-slim-owner-renderer .subscriber-count," +
+        " ytm-channel-cell-renderer .subscriber-count," +
+        " ytm-compact-channel-renderer .subscriber-count," +
+        " ytm-channel-about-metadata-renderer .subscriber-count";
+    const SUBSCRIBER_TEXT_CONTAINER_SELECTOR =
+        "ytd-video-owner-renderer," +
+        " ytd-channel-renderer," +
+        " ytd-grid-channel-renderer," +
+        " ytd-compact-channel-renderer," +
+        " ytd-mini-channel-renderer," +
+        " ytd-page-manager[page-subtype='channels']," +
+        " ytd-browse[page-subtype='channels']," +
+        " ytd-c4-tabbed-header-renderer," +
+        " ytd-channel-header-renderer," +
+        " ytd-immersive-header-renderer," +
+        " ytd-channel-tagline-renderer," +
+        " ytd-channel-about-metadata-renderer," +
+        " ytm-channel-header-renderer," +
+        " ytm-video-owner-renderer," +
+        " ytm-slim-owner-renderer," +
+        " ytm-channel-cell-renderer," +
+        " ytm-compact-channel-renderer," +
+        " ytm-channel-about-metadata-renderer," +
+        " ytm-channel-card-renderer," +
+        " ytm-channel-list-item-renderer";
 
     const getText = (el) => (el && el.textContent ? el.textContent.trim() : "");
 
@@ -430,6 +478,54 @@
         hidden.forEach((el) => restoreCommentsElement(el));
     };
 
+    const hideSubscriberCountElement = (el) => {
+        if (!el) return false;
+        if (!el.isConnected) return false;
+        if (el.getAttribute("data-subscriber-count-hidden") === "true") return false;
+        const prevDisplay = el.style.getPropertyValue("display");
+        const prevDisplayPriority = el.style.getPropertyPriority("display");
+        const prevVisibility = el.style.getPropertyValue("content-visibility");
+        const prevVisibilityPriority = el.style.getPropertyPriority("content-visibility");
+        el.setAttribute("data-subscriber-count-hidden", "true");
+        el.setAttribute("data-subscriber-count-hidden-display", prevDisplay);
+        el.setAttribute("data-subscriber-count-hidden-display-priority", prevDisplayPriority);
+        el.setAttribute("data-subscriber-count-hidden-content-visibility", prevVisibility);
+        el.setAttribute("data-subscriber-count-hidden-content-visibility-priority", prevVisibilityPriority);
+        el.style.setProperty("display", "none", "important");
+        el.style.setProperty("content-visibility", "hidden", "important");
+        return true;
+    };
+
+    const restoreSubscriberCountElement = (el) => {
+        if (!el) return false;
+        if (el.getAttribute("data-subscriber-count-hidden") !== "true") return false;
+        const prevDisplay = el.getAttribute("data-subscriber-count-hidden-display") || "";
+        const prevDisplayPriority = el.getAttribute("data-subscriber-count-hidden-display-priority") || "";
+        const prevVisibility = el.getAttribute("data-subscriber-count-hidden-content-visibility") || "";
+        const prevVisibilityPriority = el.getAttribute("data-subscriber-count-hidden-content-visibility-priority") || "";
+        if (prevDisplay) {
+            el.style.setProperty("display", prevDisplay, prevDisplayPriority);
+        } else {
+            el.style.removeProperty("display");
+        }
+        if (prevVisibility) {
+            el.style.setProperty("content-visibility", prevVisibility, prevVisibilityPriority);
+        } else {
+            el.style.removeProperty("content-visibility");
+        }
+        el.removeAttribute("data-subscriber-count-hidden");
+        el.removeAttribute("data-subscriber-count-hidden-display");
+        el.removeAttribute("data-subscriber-count-hidden-display-priority");
+        el.removeAttribute("data-subscriber-count-hidden-content-visibility");
+        el.removeAttribute("data-subscriber-count-hidden-content-visibility-priority");
+        return true;
+    };
+
+    const restoreSubscriberCounts = (root = document) => {
+        const hidden = root.querySelectorAll("[data-subscriber-count-hidden='true']");
+        hidden.forEach((el) => restoreSubscriberCountElement(el));
+    };
+
     const findCommentEntryByText = (root = document) => {
         const candidates = root.querySelectorAll(
             "ytm-item-section-renderer, ytd-item-section-renderer, ytm-slim-video-metadata-section-renderer, ytd-slim-video-metadata-section-renderer, ytm-video-description-renderer"
@@ -448,12 +544,56 @@
         });
     };
 
+    const isSubscriberCountText = (text) => {
+        if (!text) return false;
+        const trimmed = text.trim();
+        if (!trimmed) return false;
+        if (!SUBSCRIBER_LABEL_RE.test(trimmed)) return false;
+        if (/\d/.test(trimmed)) return true;
+        return /\bno\b/i.test(trimmed);
+    };
+
+    const isChannelLink = (el) => {
+        if (!el || !el.closest) return false;
+        const link = el.closest("a[href]");
+        if (!link) return false;
+        const href = link.getAttribute("href") || "";
+        return (
+            href.startsWith("/@") ||
+            href.startsWith("/channel/") ||
+            href.startsWith("/c/") ||
+            href.startsWith("/user/")
+        );
+    };
+
+    const findSubscriberCountsByText = (root = document) => {
+        const containers = root.querySelectorAll(SUBSCRIBER_TEXT_CONTAINER_SELECTOR);
+        containers.forEach((container) => {
+            if (!container || !container.querySelectorAll) return;
+            const labels = container.querySelectorAll("yt-formatted-string, span, div");
+            for (const label of labels) {
+                if (!label) continue;
+                if (label.childElementCount > 0 && label.tagName !== "YT-FORMATTED-STRING") continue;
+                if (isChannelLink(label)) continue;
+                const text = getText(label);
+                if (!isSubscriberCountText(text)) continue;
+                hideSubscriberCountElement(label);
+            }
+        });
+    };
+
     const hideComments = (root = document) => {
         const sections = root.querySelectorAll(COMMENT_SECTION_SELECTOR);
         sections.forEach((section) => hideCommentsElement(section));
         const entryPoints = root.querySelectorAll(COMMENT_ENTRY_SELECTOR);
         entryPoints.forEach((entry) => hideCommentsElement(entry));
         findCommentEntryByText(root);
+    };
+
+    const hideSubscriberCounts = (root = document) => {
+        const targets = root.querySelectorAll(SUBSCRIBER_COUNT_SELECTOR);
+        targets.forEach((target) => hideSubscriberCountElement(target));
+        findSubscriberCountsByText(root);
     };
 
     const hideLikesDislikes = (root = document) => {
@@ -613,6 +753,7 @@
     let likesHidden = DEFAULT_LIKES_HIDDEN;
     let likeCountHidden = DEFAULT_LIKE_COUNT_HIDDEN;
     let commentsHidden = DEFAULT_COMMENTS_HIDDEN;
+    let subscriberCountHidden = DEFAULT_SUBSCRIBER_COUNT_HIDDEN;
     let documentReady = document.readyState !== "loading";
     let playlistEnsureQueued = false;
 
@@ -683,6 +824,7 @@
     let likesSweepScheduled = false;
     let likeCountSweepScheduled = false;
     let commentsSweepScheduled = false;
+    let subscriberCountSweepScheduled = false;
     let observerActive = false;
     let settingsLoaded = false;
 
@@ -740,6 +882,17 @@
         });
     };
 
+    const scheduleSubscriberCountSweep = () => {
+        if (!settingsLoaded || !subscriberCountHidden) return;
+        if (subscriberCountSweepScheduled) return;
+        subscriberCountSweepScheduled = true;
+        requestAnimationFrame(() => {
+            subscriberCountSweepScheduled = false;
+            if (!subscriberCountHidden) return;
+            hideSubscriberCounts(document);
+        });
+    };
+
     const observer = new MutationObserver((mutations) => {
         if (mutations.length) {
             schedulePlaylistEnsure();
@@ -751,17 +904,20 @@
                     scheduleLikesSweep();
                     scheduleLikeCountSweep();
                     scheduleCommentsSweep();
+                    scheduleSubscriberCountSweep();
                 }
             } else if (mutation.type === "attributes") {
                 scheduleSweep();
                 scheduleLikesSweep();
                 scheduleLikeCountSweep();
                 scheduleCommentsSweep();
+                scheduleSubscriberCountSweep();
             } else if (mutation.type === "characterData") {
                 scheduleSweep();
                 scheduleLikesSweep();
                 scheduleLikeCountSweep();
                 scheduleCommentsSweep();
+                scheduleSubscriberCountSweep();
             }
         }
     });
@@ -799,15 +955,18 @@
         if (commentsHidden) {
             hideComments(document);
         }
+        if (subscriberCountHidden) {
+            hideSubscriberCounts(document);
+        }
         schedulePlaylistEnsure();
-        if (enabled || likesHidden || likeCountHidden || commentsHidden) {
+        if (enabled || likesHidden || likeCountHidden || commentsHidden || subscriberCountHidden) {
             startObserver();
         }
     };
 
     const maybeStart = () => {
         if (!documentReady || !settingsLoaded) return;
-        if (!enabled && !likesHidden && !likeCountHidden && !commentsHidden) return;
+        if (!enabled && !likesHidden && !likeCountHidden && !commentsHidden && !subscriberCountHidden) return;
         start();
     };
 
@@ -822,7 +981,7 @@
         } else {
             restoreShortsEverywhere(document);
             ensurePlaylistButton();
-            if (!likesHidden && !likeCountHidden && !commentsHidden) {
+            if (!likesHidden && !likeCountHidden && !commentsHidden && !subscriberCountHidden) {
                 stopObserver();
             }
         }
@@ -848,7 +1007,7 @@
             if (likeCountHidden) {
                 scheduleLikeCountSweep();
             }
-            if (!enabled && !likeCountHidden && !commentsHidden) {
+            if (!enabled && !likeCountHidden && !commentsHidden && !subscriberCountHidden) {
                 stopObserver();
             }
         }
@@ -864,7 +1023,7 @@
             }
         } else {
             restoreLikeCounts(document);
-            if (!enabled && !likesHidden && !commentsHidden) {
+            if (!enabled && !likesHidden && !commentsHidden && !subscriberCountHidden) {
                 stopObserver();
             }
         }
@@ -880,7 +1039,23 @@
             }
         } else {
             restoreComments(document);
-            if (!enabled && !likesHidden && !likeCountHidden) {
+            if (!enabled && !likesHidden && !likeCountHidden && !subscriberCountHidden) {
+                stopObserver();
+            }
+        }
+    };
+
+    const setSubscriberCountHidden = (nextHidden) => {
+        const normalized = nextHidden === true;
+        if (subscriberCountHidden === normalized) return;
+        subscriberCountHidden = normalized;
+        if (subscriberCountHidden) {
+            if (documentReady) {
+                start();
+            }
+        } else {
+            restoreSubscriberCounts(document);
+            if (!enabled && !likesHidden && !likeCountHidden && !commentsHidden) {
                 stopObserver();
             }
         }
@@ -891,15 +1066,17 @@
         initialPlaylistEnabled,
         initialLikesHidden,
         initialLikeCountHidden,
-        initialCommentsHidden
+        initialCommentsHidden,
+        initialSubscriberCountHidden
     ) => {
         enabled = initialEnabled !== false;
         playlistEnabled = initialPlaylistEnabled !== false;
         likesHidden = initialLikesHidden === true;
         likeCountHidden = initialLikeCountHidden === true;
         commentsHidden = initialCommentsHidden === true;
+        subscriberCountHidden = initialSubscriberCountHidden === true;
         settingsLoaded = true;
-        if (enabled || likesHidden || likeCountHidden || commentsHidden) {
+        if (enabled || likesHidden || likeCountHidden || commentsHidden || subscriberCountHidden) {
             maybeStart();
         } else {
             stopObserver();
@@ -915,6 +1092,9 @@
         }
         if (!commentsHidden) {
             restoreComments(document);
+        }
+        if (!subscriberCountHidden) {
+            restoreSubscriberCounts(document);
         }
         schedulePlaylistEnsure();
     };
@@ -937,7 +1117,8 @@
                 [PLAYLIST_STORAGE_KEY]: DEFAULT_PLAYLIST_ENABLED,
                 [LIKES_STORAGE_KEY]: DEFAULT_LIKES_HIDDEN,
                 [LIKE_COUNT_STORAGE_KEY]: DEFAULT_LIKE_COUNT_HIDDEN,
-                [COMMENTS_STORAGE_KEY]: DEFAULT_COMMENTS_HIDDEN
+                [COMMENTS_STORAGE_KEY]: DEFAULT_COMMENTS_HIDDEN,
+                [SUBSCRIBER_COUNT_STORAGE_KEY]: DEFAULT_SUBSCRIBER_COUNT_HIDDEN
             })
             .then((result) =>
                 applyInitialSettings(
@@ -945,7 +1126,8 @@
                     result[PLAYLIST_STORAGE_KEY],
                     result[LIKES_STORAGE_KEY],
                     result[LIKE_COUNT_STORAGE_KEY],
-                    result[COMMENTS_STORAGE_KEY]
+                    result[COMMENTS_STORAGE_KEY],
+                    result[SUBSCRIBER_COUNT_STORAGE_KEY]
                 )
             )
             .catch(() =>
@@ -954,7 +1136,8 @@
                     DEFAULT_PLAYLIST_ENABLED,
                     DEFAULT_LIKES_HIDDEN,
                     DEFAULT_LIKE_COUNT_HIDDEN,
-                    DEFAULT_COMMENTS_HIDDEN
+                    DEFAULT_COMMENTS_HIDDEN,
+                    DEFAULT_SUBSCRIBER_COUNT_HIDDEN
                 )
             );
     } else {
@@ -963,7 +1146,8 @@
             DEFAULT_PLAYLIST_ENABLED,
             DEFAULT_LIKES_HIDDEN,
             DEFAULT_LIKE_COUNT_HIDDEN,
-            DEFAULT_COMMENTS_HIDDEN
+            DEFAULT_COMMENTS_HIDDEN,
+            DEFAULT_SUBSCRIBER_COUNT_HIDDEN
         );
     }
 
@@ -985,6 +1169,9 @@
             if (changes[COMMENTS_STORAGE_KEY]) {
                 setCommentsHidden(changes[COMMENTS_STORAGE_KEY].newValue);
             }
+            if (changes[SUBSCRIBER_COUNT_STORAGE_KEY]) {
+                setSubscriberCountHidden(changes[SUBSCRIBER_COUNT_STORAGE_KEY].newValue);
+            }
         });
     }
 
@@ -993,6 +1180,7 @@
         scheduleLikesSweep();
         scheduleLikeCountSweep();
         scheduleCommentsSweep();
+        scheduleSubscriberCountSweep();
         schedulePlaylistEnsure();
     });
 
@@ -1002,6 +1190,7 @@
             scheduleLikesSweep();
             scheduleLikeCountSweep();
             scheduleCommentsSweep();
+            scheduleSubscriberCountSweep();
             schedulePlaylistEnsure();
         }
     });
@@ -1010,6 +1199,7 @@
         scheduleLikesSweep();
         scheduleLikeCountSweep();
         scheduleCommentsSweep();
+        scheduleSubscriberCountSweep();
         schedulePlaylistEnsure();
     };
 
@@ -1020,4 +1210,5 @@
     scheduleLikesSweep();
     scheduleLikeCountSweep();
     scheduleCommentsSweep();
+    scheduleSubscriberCountSweep();
 })();
