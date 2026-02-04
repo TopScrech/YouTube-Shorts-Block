@@ -18,6 +18,7 @@
     const LIKE_LABEL_RE = /\blike(d)?\b/i;
     const DISLIKE_LABEL_RE = /\bdislike(d)?\b/i;
     const LIKE_COUNT_TEXT_RE = /\d/;
+    const COMMENT_ENTRY_TEXT_RE = /\bcomments?\b/i;
     const COMMENT_SECTION_SELECTOR =
         "ytd-comments#comments," +
         " ytd-comments," +
@@ -26,6 +27,15 @@
         " ytm-item-section-renderer.comment-section," +
         " ytm-comment-section-renderer," +
         " ytm-comments-entry-point-renderer";
+    const COMMENT_ENTRY_SELECTOR =
+        "ytd-comments-entry-point-renderer," +
+        " ytd-comments-entry-point-header-renderer," +
+        " ytd-comment-entry-point-renderer," +
+        " ytd-engagement-panel-section-list-renderer[target-id='comments-entry-point']," +
+        " ytm-comments-entry-point-renderer," +
+        " ytm-comments-entry-point-header-renderer," +
+        " ytm-comment-entry-point-renderer," +
+        " ytm-engagement-panel-section-list-renderer[target-id='comments-entry-point']";
 
     const getText = (el) => (el && el.textContent ? el.textContent.trim() : "");
 
@@ -420,9 +430,30 @@
         hidden.forEach((el) => restoreCommentsElement(el));
     };
 
+    const findCommentEntryByText = (root = document) => {
+        const candidates = root.querySelectorAll(
+            "ytm-item-section-renderer, ytd-item-section-renderer, ytm-slim-video-metadata-section-renderer, ytd-slim-video-metadata-section-renderer, ytm-video-description-renderer"
+        );
+        candidates.forEach((candidate) => {
+            if (!candidate || !candidate.querySelectorAll) return;
+            const labels = candidate.querySelectorAll("[aria-label], #title, h2, h3, span, yt-formatted-string, div");
+            for (const label of labels) {
+                if (!label) continue;
+                const text = getText(label);
+                if (!text) continue;
+                if (!COMMENT_ENTRY_TEXT_RE.test(text)) continue;
+                hideCommentsElement(candidate);
+                break;
+            }
+        });
+    };
+
     const hideComments = (root = document) => {
         const sections = root.querySelectorAll(COMMENT_SECTION_SELECTOR);
         sections.forEach((section) => hideCommentsElement(section));
+        const entryPoints = root.querySelectorAll(COMMENT_ENTRY_SELECTOR);
+        entryPoints.forEach((entry) => hideCommentsElement(entry));
+        findCommentEntryByText(root);
     };
 
     const hideLikesDislikes = (root = document) => {
