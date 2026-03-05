@@ -4,6 +4,7 @@
     --fg: #16181d;
     --muted: #6b7280;
     --panel: rgba(255, 255, 255, 0.8);
+    --panel-solid: #ffffff;
     --panel-border: rgba(15, 23, 42, 0.1);
     --accent: #ef4444;
     --track-off-start: #d1d5db;
@@ -24,6 +25,10 @@ body {
         radial-gradient(circle at 14% -10%, rgba(251, 113, 133, 0.35), transparent 38%),
         radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.2), transparent 44%),
         var(--bg);
+}
+
+html {
+    background: var(--bg);
 }
 
 .popup {
@@ -51,6 +56,7 @@ body {
     border-radius: 12px;
     border: 1px solid var(--panel-border);
     background: var(--panel);
+    -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
     transition: border-color 180ms ease, transform 180ms ease, background 180ms ease;
 }
@@ -134,6 +140,7 @@ body {
         --fg: #f3f4f6;
         --muted: #9ca3af;
         --panel: rgba(22, 26, 36, 0.88);
+        --panel-solid: #161a24;
         --panel-border: rgba(148, 163, 184, 0.2);
         --track-off-start: #3a4150;
         --track-off-end: #2d3442;
@@ -149,5 +156,18 @@ body {
 
     .toggle-thumb {
         box-shadow: 0 2px 7px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.16) inset;
+    }
+}
+
+@supports (-webkit-touch-callout: none) {
+    html,
+    body {
+        background: var(--bg);
+    }
+
+    .toggle {
+        background: var(--panel-solid);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
     }
 }
