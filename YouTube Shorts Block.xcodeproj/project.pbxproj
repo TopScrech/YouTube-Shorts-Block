@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 90;
+	objectVersion = 100;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -38,6 +38,7 @@
 		F36549F62F1F05470076EF1F /* YouTube Shorts Block Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "YouTube Shorts Block Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3A65AC12F29359B008354CC /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		F3B87A7B2F26DB4900421093 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
+		F3E05F8C2F467CD4001B77CD /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -100,6 +101,7 @@
 			children = (
 				F3B87A7B2F26DB4900421093 /* AGENTS.md */,
 				F3A65AC12F29359B008354CC /* README.md */,
+				F3E05F8C2F467CD4001B77CD /* LICENSE.txt */,
 				F36549DB2F1F05460076EF1F /* YouTube Shorts Block */,
 				F36549FA2F1F05470076EF1F /* YouTube Shorts Block Extension */,
 				F3E136D62F22444A00124D7D /* Frameworks */,
@@ -199,7 +201,7 @@
 			packageReferences = (
 				F3E136D52F22444200124D7D /* XCRemoteSwiftPackageReference "ScrechKit" */,
 			);
-			preferredProjectObjectVersion = 90;
+			preferredProjectObjectVersion = 100;
 			productRefGroup = F36549DA2F1F05460076EF1F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -484,7 +486,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 26.1;
+				MARKETING_VERSION = 26.1.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -546,7 +548,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 26.1;
+				MARKETING_VERSION = 26.1.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = auto;

@@ -10,7 +10,12 @@ struct SetupInstructionsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                appIcon
+                Image(.largeIcon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(96)
+                    .clipShape(.rect(cornerRadius: 16))
+                    .accessibilityLabel("Focus mode for YouTube icon")
                 
                 VStack(spacing: 8) {
                     Text("Focus mode for YouTube")
@@ -43,15 +48,6 @@ struct SetupInstructionsView: View {
             .frame(maxWidth: 520)
             .frame(maxWidth: .infinity)
         }
-    }
-    
-    private var appIcon: some View {
-        Image(.largeIcon)
-            .resizable()
-            .scaledToFit()
-            .frame(96)
-            .clipShape(.rect(cornerRadius: 16))
-            .accessibilityLabel("Focus mode for YouTube icon")
     }
     
     @ViewBuilder

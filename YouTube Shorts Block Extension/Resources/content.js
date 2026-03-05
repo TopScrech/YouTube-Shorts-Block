@@ -9,10 +9,81 @@
     const DEFAULT_PLAYLIST_ENABLED = true;
     const LIKES_STORAGE_KEY = "hideLikesDislikes";
     const DEFAULT_LIKES_HIDDEN = false;
+    const LIKE_COUNT_STORAGE_KEY = "hideLikeCount";
+    const DEFAULT_LIKE_COUNT_HIDDEN = false;
+    const COMMENTS_STORAGE_KEY = "hideComments";
+    const DEFAULT_COMMENTS_HIDDEN = false;
+    const SUBSCRIBER_COUNT_STORAGE_KEY = "hideSubscriberCount";
+    const DEFAULT_SUBSCRIBER_COUNT_HIDDEN = false;
     const PLAYLIST_BUTTON_ID = "yt-tweaks-playlist-return";
     const PLAYLIST_STYLE_ID = "yt-tweaks-playlist-return-style";
     const LIKE_LABEL_RE = /\blike(d)?\b/i;
     const DISLIKE_LABEL_RE = /\bdislike(d)?\b/i;
+    const LIKE_COUNT_TEXT_RE = /\d/;
+    const COMMENT_ENTRY_TEXT_RE = /\bcomments?\b/i;
+    const SUBSCRIBER_LABEL_RE =
+        /\b(subscribers?|subs|abonnees?|abonnent(en)?|suscriptores?|inscritos?|iscritti)\b/i;
+    const COMMENT_SECTION_SELECTOR =
+        "ytd-comments#comments," +
+        " ytd-comments," +
+        " ytd-reel-comments-renderer," +
+        " ytm-item-section-renderer[section-identifier='comment-item-section']," +
+        " ytm-item-section-renderer.comment-section," +
+        " ytm-comment-section-renderer," +
+        " ytm-comments-entry-point-renderer";
+    const COMMENT_ENTRY_SELECTOR =
+        "ytd-comments-entry-point-renderer," +
+        " ytd-comments-entry-point-header-renderer," +
+        " ytd-comment-entry-point-renderer," +
+        " ytd-engagement-panel-section-list-renderer[target-id='comments-entry-point']," +
+        " ytm-comments-entry-point-renderer," +
+        " ytm-comments-entry-point-header-renderer," +
+        " ytm-comment-entry-point-renderer," +
+        " ytm-engagement-panel-section-list-renderer[target-id='comments-entry-point']";
+    const SUBSCRIBER_COUNT_SELECTOR =
+        "#subscriber-count," +
+        " #subscribers," +
+        " .subscriber-count," +
+        " ytd-video-owner-renderer #subscriber-count," +
+        " ytd-video-owner-renderer #subscribers," +
+        " ytd-channel-name #subscriber-count," +
+        " ytd-channel-name #subscribers," +
+        " ytd-c4-tabbed-header-renderer #subscriber-count," +
+        " ytd-channel-header-renderer #subscriber-count," +
+        " ytd-immersive-header-renderer #subscriber-count," +
+        " ytd-channel-tagline-renderer #subscriber-count," +
+        " ytd-channel-renderer #subscribers," +
+        " ytd-grid-channel-renderer #subscribers," +
+        " ytd-compact-channel-renderer #subscribers," +
+        " ytd-mini-channel-renderer #subscribers," +
+        " ytm-subscribe-button-renderer .subscriber-count," +
+        " ytm-channel-header-renderer .subscriber-count," +
+        " ytm-video-owner-renderer .subscriber-count," +
+        " ytm-slim-owner-renderer .subscriber-count," +
+        " ytm-channel-cell-renderer .subscriber-count," +
+        " ytm-compact-channel-renderer .subscriber-count," +
+        " ytm-channel-about-metadata-renderer .subscriber-count";
+    const SUBSCRIBER_TEXT_CONTAINER_SELECTOR =
+        "ytd-video-owner-renderer," +
+        " ytd-channel-renderer," +
+        " ytd-grid-channel-renderer," +
+        " ytd-compact-channel-renderer," +
+        " ytd-mini-channel-renderer," +
+        " ytd-page-manager[page-subtype='channels']," +
+        " ytd-browse[page-subtype='channels']," +
+        " ytd-c4-tabbed-header-renderer," +
+        " ytd-channel-header-renderer," +
+        " ytd-immersive-header-renderer," +
+        " ytd-channel-tagline-renderer," +
+        " ytd-channel-about-metadata-renderer," +
+        " ytm-channel-header-renderer," +
+        " ytm-video-owner-renderer," +
+        " ytm-slim-owner-renderer," +
+        " ytm-channel-cell-renderer," +
+        " ytm-compact-channel-renderer," +
+        " ytm-channel-about-metadata-renderer," +
+        " ytm-channel-card-renderer," +
+        " ytm-channel-list-item-renderer";
 
     const getText = (el) => (el && el.textContent ? el.textContent.trim() : "");
 
@@ -111,11 +182,7 @@
 
     const findCommentsSection = () => (
         document.querySelector(
-            "ytd-comments#comments," +
-                " ytm-item-section-renderer[section-identifier='comment-item-section']," +
-                " ytm-item-section-renderer.comment-section," +
-                " ytm-comment-section-renderer," +
-                " ytm-comments-entry-point-renderer"
+            COMMENT_SECTION_SELECTOR
         )
     );
 
@@ -279,6 +346,14 @@
         return LIKE_LABEL_RE.test(trimmed);
     };
 
+    const isLikeLabel = (label) => {
+        if (!label) return false;
+        const trimmed = label.trim();
+        if (!trimmed) return false;
+        if (DISLIKE_LABEL_RE.test(trimmed)) return false;
+        return LIKE_LABEL_RE.test(trimmed);
+    };
+
     const isLikeDislikeElement = (el) => {
         if (!el) return false;
         const labels = [
@@ -291,6 +366,234 @@
             if (isLikeDislikeLabel(label)) return true;
         }
         return false;
+    };
+
+    const isLikeElement = (el) => {
+        if (!el) return false;
+        const labels = [
+            el.getAttribute && el.getAttribute("aria-label"),
+            el.getAttribute && el.getAttribute("title"),
+            el.getAttribute && el.getAttribute("data-tooltip-text"),
+            getText(el)
+        ];
+        for (const label of labels) {
+            if (isLikeLabel(label)) return true;
+        }
+        return false;
+    };
+
+    const hideLikeCountElement = (el) => {
+        if (!el) return false;
+        if (!el.isConnected) return false;
+        if (el.getAttribute("data-like-count-hidden") === "true") return false;
+        const prevDisplay = el.style.getPropertyValue("display");
+        const prevDisplayPriority = el.style.getPropertyPriority("display");
+        const prevVisibility = el.style.getPropertyValue("content-visibility");
+        const prevVisibilityPriority = el.style.getPropertyPriority("content-visibility");
+        el.setAttribute("data-like-count-hidden", "true");
+        el.setAttribute("data-like-count-hidden-display", prevDisplay);
+        el.setAttribute("data-like-count-hidden-display-priority", prevDisplayPriority);
+        el.setAttribute("data-like-count-hidden-content-visibility", prevVisibility);
+        el.setAttribute("data-like-count-hidden-content-visibility-priority", prevVisibilityPriority);
+        el.style.setProperty("display", "none", "important");
+        el.style.setProperty("content-visibility", "hidden", "important");
+        return true;
+    };
+
+    const restoreLikeCountElement = (el) => {
+        if (!el) return false;
+        if (el.getAttribute("data-like-count-hidden") !== "true") return false;
+        const prevDisplay = el.getAttribute("data-like-count-hidden-display") || "";
+        const prevDisplayPriority = el.getAttribute("data-like-count-hidden-display-priority") || "";
+        const prevVisibility = el.getAttribute("data-like-count-hidden-content-visibility") || "";
+        const prevVisibilityPriority = el.getAttribute("data-like-count-hidden-content-visibility-priority") || "";
+        if (prevDisplay) {
+            el.style.setProperty("display", prevDisplay, prevDisplayPriority);
+        } else {
+            el.style.removeProperty("display");
+        }
+        if (prevVisibility) {
+            el.style.setProperty("content-visibility", prevVisibility, prevVisibilityPriority);
+        } else {
+            el.style.removeProperty("content-visibility");
+        }
+        el.removeAttribute("data-like-count-hidden");
+        el.removeAttribute("data-like-count-hidden-display");
+        el.removeAttribute("data-like-count-hidden-display-priority");
+        el.removeAttribute("data-like-count-hidden-content-visibility");
+        el.removeAttribute("data-like-count-hidden-content-visibility-priority");
+        return true;
+    };
+
+    const restoreLikeCounts = (root = document) => {
+        const hidden = root.querySelectorAll("[data-like-count-hidden='true']");
+        hidden.forEach((el) => restoreLikeCountElement(el));
+    };
+
+    const hideCommentsElement = (el) => {
+        if (!el) return false;
+        if (!el.isConnected) return false;
+        if (el.getAttribute("data-comments-hidden") === "true") return false;
+        const prevDisplay = el.style.getPropertyValue("display");
+        const prevDisplayPriority = el.style.getPropertyPriority("display");
+        const prevVisibility = el.style.getPropertyValue("content-visibility");
+        const prevVisibilityPriority = el.style.getPropertyPriority("content-visibility");
+        el.setAttribute("data-comments-hidden", "true");
+        el.setAttribute("data-comments-hidden-display", prevDisplay);
+        el.setAttribute("data-comments-hidden-display-priority", prevDisplayPriority);
+        el.setAttribute("data-comments-hidden-content-visibility", prevVisibility);
+        el.setAttribute("data-comments-hidden-content-visibility-priority", prevVisibilityPriority);
+        el.style.setProperty("display", "none", "important");
+        el.style.setProperty("content-visibility", "hidden", "important");
+        return true;
+    };
+
+    const restoreCommentsElement = (el) => {
+        if (!el) return false;
+        if (el.getAttribute("data-comments-hidden") !== "true") return false;
+        const prevDisplay = el.getAttribute("data-comments-hidden-display") || "";
+        const prevDisplayPriority = el.getAttribute("data-comments-hidden-display-priority") || "";
+        const prevVisibility = el.getAttribute("data-comments-hidden-content-visibility") || "";
+        const prevVisibilityPriority = el.getAttribute("data-comments-hidden-content-visibility-priority") || "";
+        if (prevDisplay) {
+            el.style.setProperty("display", prevDisplay, prevDisplayPriority);
+        } else {
+            el.style.removeProperty("display");
+        }
+        if (prevVisibility) {
+            el.style.setProperty("content-visibility", prevVisibility, prevVisibilityPriority);
+        } else {
+            el.style.removeProperty("content-visibility");
+        }
+        el.removeAttribute("data-comments-hidden");
+        el.removeAttribute("data-comments-hidden-display");
+        el.removeAttribute("data-comments-hidden-display-priority");
+        el.removeAttribute("data-comments-hidden-content-visibility");
+        el.removeAttribute("data-comments-hidden-content-visibility-priority");
+        return true;
+    };
+
+    const restoreComments = (root = document) => {
+        const hidden = root.querySelectorAll("[data-comments-hidden='true']");
+        hidden.forEach((el) => restoreCommentsElement(el));
+    };
+
+    const hideSubscriberCountElement = (el) => {
+        if (!el) return false;
+        if (!el.isConnected) return false;
+        if (el.getAttribute("data-subscriber-count-hidden") === "true") return false;
+        const prevDisplay = el.style.getPropertyValue("display");
+        const prevDisplayPriority = el.style.getPropertyPriority("display");
+        const prevVisibility = el.style.getPropertyValue("content-visibility");
+        const prevVisibilityPriority = el.style.getPropertyPriority("content-visibility");
+        el.setAttribute("data-subscriber-count-hidden", "true");
+        el.setAttribute("data-subscriber-count-hidden-display", prevDisplay);
+        el.setAttribute("data-subscriber-count-hidden-display-priority", prevDisplayPriority);
+        el.setAttribute("data-subscriber-count-hidden-content-visibility", prevVisibility);
+        el.setAttribute("data-subscriber-count-hidden-content-visibility-priority", prevVisibilityPriority);
+        el.style.setProperty("display", "none", "important");
+        el.style.setProperty("content-visibility", "hidden", "important");
+        return true;
+    };
+
+    const restoreSubscriberCountElement = (el) => {
+        if (!el) return false;
+        if (el.getAttribute("data-subscriber-count-hidden") !== "true") return false;
+        const prevDisplay = el.getAttribute("data-subscriber-count-hidden-display") || "";
+        const prevDisplayPriority = el.getAttribute("data-subscriber-count-hidden-display-priority") || "";
+        const prevVisibility = el.getAttribute("data-subscriber-count-hidden-content-visibility") || "";
+        const prevVisibilityPriority = el.getAttribute("data-subscriber-count-hidden-content-visibility-priority") || "";
+        if (prevDisplay) {
+            el.style.setProperty("display", prevDisplay, prevDisplayPriority);
+        } else {
+            el.style.removeProperty("display");
+        }
+        if (prevVisibility) {
+            el.style.setProperty("content-visibility", prevVisibility, prevVisibilityPriority);
+        } else {
+            el.style.removeProperty("content-visibility");
+        }
+        el.removeAttribute("data-subscriber-count-hidden");
+        el.removeAttribute("data-subscriber-count-hidden-display");
+        el.removeAttribute("data-subscriber-count-hidden-display-priority");
+        el.removeAttribute("data-subscriber-count-hidden-content-visibility");
+        el.removeAttribute("data-subscriber-count-hidden-content-visibility-priority");
+        return true;
+    };
+
+    const restoreSubscriberCounts = (root = document) => {
+        const hidden = root.querySelectorAll("[data-subscriber-count-hidden='true']");
+        hidden.forEach((el) => restoreSubscriberCountElement(el));
+    };
+
+    const findCommentEntryByText = (root = document) => {
+        const candidates = root.querySelectorAll(
+            "ytm-item-section-renderer, ytd-item-section-renderer, ytm-slim-video-metadata-section-renderer, ytd-slim-video-metadata-section-renderer, ytm-video-description-renderer"
+        );
+        candidates.forEach((candidate) => {
+            if (!candidate || !candidate.querySelectorAll) return;
+            const labels = candidate.querySelectorAll("[aria-label], #title, h2, h3, span, yt-formatted-string, div");
+            for (const label of labels) {
+                if (!label) continue;
+                const text = getText(label);
+                if (!text) continue;
+                if (!COMMENT_ENTRY_TEXT_RE.test(text)) continue;
+                hideCommentsElement(candidate);
+                break;
+            }
+        });
+    };
+
+    const isSubscriberCountText = (text) => {
+        if (!text) return false;
+        const trimmed = text.trim();
+        if (!trimmed) return false;
+        if (!SUBSCRIBER_LABEL_RE.test(trimmed)) return false;
+        if (/\d/.test(trimmed)) return true;
+        return /\bno\b/i.test(trimmed);
+    };
+
+    const isChannelLink = (el) => {
+        if (!el || !el.closest) return false;
+        const link = el.closest("a[href]");
+        if (!link) return false;
+        const href = link.getAttribute("href") || "";
+        return (
+            href.startsWith("/@") ||
+            href.startsWith("/channel/") ||
+            href.startsWith("/c/") ||
+            href.startsWith("/user/")
+        );
+    };
+
+    const findSubscriberCountsByText = (root = document) => {
+        const containers = root.querySelectorAll(SUBSCRIBER_TEXT_CONTAINER_SELECTOR);
+        containers.forEach((container) => {
+            if (!container || !container.querySelectorAll) return;
+            const labels = container.querySelectorAll("yt-formatted-string, span, div");
+            for (const label of labels) {
+                if (!label) continue;
+                if (label.childElementCount > 0 && label.tagName !== "YT-FORMATTED-STRING") continue;
+                if (isChannelLink(label)) continue;
+                const text = getText(label);
+                if (!isSubscriberCountText(text)) continue;
+                hideSubscriberCountElement(label);
+            }
+        });
+    };
+
+    const hideComments = (root = document) => {
+        const sections = root.querySelectorAll(COMMENT_SECTION_SELECTOR);
+        sections.forEach((section) => hideCommentsElement(section));
+        const entryPoints = root.querySelectorAll(COMMENT_ENTRY_SELECTOR);
+        entryPoints.forEach((entry) => hideCommentsElement(entry));
+        findCommentEntryByText(root);
+    };
+
+    const hideSubscriberCounts = (root = document) => {
+        const targets = root.querySelectorAll(SUBSCRIBER_COUNT_SELECTOR);
+        targets.forEach((target) => hideSubscriberCountElement(target));
+        findSubscriberCountsByText(root);
     };
 
     const hideLikesDislikes = (root = document) => {
@@ -310,6 +613,38 @@
             });
         });
         targets.forEach((el) => hideLikesElement(el));
+    };
+
+    const hideLikeCounts = (root = document) => {
+        const actionBars = root.querySelectorAll(
+            "ytd-menu-renderer, ytd-reel-player-overlay-renderer, ytd-reel-player-header-renderer, ytm-slim-video-action-bar-renderer, ytm-video-action-bar-renderer"
+        );
+        const targets = new Set();
+        actionBars.forEach((bar) => {
+            const labeled = bar.querySelectorAll("[aria-label], [title], [data-tooltip-text]");
+            labeled.forEach((el) => {
+                if (!isLikeElement(el)) return;
+                const container =
+                    el.closest(
+                        "ytd-like-button-renderer, ytm-like-button-renderer, ytd-toggle-button-renderer, ytm-toggle-button-renderer, button"
+                    ) || el;
+                targets.add(container);
+            });
+        });
+        targets.forEach((button) => {
+            if (!button || !button.querySelectorAll) return;
+            const candidates = button.querySelectorAll(
+                "yt-formatted-string, #text, .yt-spec-button-shape-next__button-text-content, .button-text, span, div"
+            );
+            candidates.forEach((candidate) => {
+                if (!candidate) return;
+                if (candidate.childElementCount > 0 && candidate.tagName !== "YT-FORMATTED-STRING") return;
+                const text = getText(candidate);
+                if (!text) return;
+                if (!LIKE_COUNT_TEXT_RE.test(text)) return;
+                hideLikeCountElement(candidate);
+            });
+        });
     };
 
     const restoreShortsEverywhere = (root = document) => {
@@ -416,6 +751,9 @@
     let enabled = DEFAULT_ENABLED;
     let playlistEnabled = DEFAULT_PLAYLIST_ENABLED;
     let likesHidden = DEFAULT_LIKES_HIDDEN;
+    let likeCountHidden = DEFAULT_LIKE_COUNT_HIDDEN;
+    let commentsHidden = DEFAULT_COMMENTS_HIDDEN;
+    let subscriberCountHidden = DEFAULT_SUBSCRIBER_COUNT_HIDDEN;
     let documentReady = document.readyState !== "loading";
     let playlistEnsureQueued = false;
 
@@ -484,6 +822,9 @@
 
     let sweepScheduled = false;
     let likesSweepScheduled = false;
+    let likeCountSweepScheduled = false;
+    let commentsSweepScheduled = false;
+    let subscriberCountSweepScheduled = false;
     let observerActive = false;
     let settingsLoaded = false;
 
@@ -519,6 +860,39 @@
         });
     };
 
+    const scheduleLikeCountSweep = () => {
+        if (!settingsLoaded || !likeCountHidden) return;
+        if (likeCountSweepScheduled) return;
+        likeCountSweepScheduled = true;
+        requestAnimationFrame(() => {
+            likeCountSweepScheduled = false;
+            if (!likeCountHidden) return;
+            hideLikeCounts(document);
+        });
+    };
+
+    const scheduleCommentsSweep = () => {
+        if (!settingsLoaded || !commentsHidden) return;
+        if (commentsSweepScheduled) return;
+        commentsSweepScheduled = true;
+        requestAnimationFrame(() => {
+            commentsSweepScheduled = false;
+            if (!commentsHidden) return;
+            hideComments(document);
+        });
+    };
+
+    const scheduleSubscriberCountSweep = () => {
+        if (!settingsLoaded || !subscriberCountHidden) return;
+        if (subscriberCountSweepScheduled) return;
+        subscriberCountSweepScheduled = true;
+        requestAnimationFrame(() => {
+            subscriberCountSweepScheduled = false;
+            if (!subscriberCountHidden) return;
+            hideSubscriberCounts(document);
+        });
+    };
+
     const observer = new MutationObserver((mutations) => {
         if (mutations.length) {
             schedulePlaylistEnsure();
@@ -528,13 +902,22 @@
                 if (mutation.addedNodes.length) {
                     scheduleSweep();
                     scheduleLikesSweep();
+                    scheduleLikeCountSweep();
+                    scheduleCommentsSweep();
+                    scheduleSubscriberCountSweep();
                 }
             } else if (mutation.type === "attributes") {
                 scheduleSweep();
                 scheduleLikesSweep();
+                scheduleLikeCountSweep();
+                scheduleCommentsSweep();
+                scheduleSubscriberCountSweep();
             } else if (mutation.type === "characterData") {
                 scheduleSweep();
                 scheduleLikesSweep();
+                scheduleLikeCountSweep();
+                scheduleCommentsSweep();
+                scheduleSubscriberCountSweep();
             }
         }
     });
@@ -566,15 +949,24 @@
         if (likesHidden) {
             hideLikesDislikes(document);
         }
+        if (likeCountHidden) {
+            hideLikeCounts(document);
+        }
+        if (commentsHidden) {
+            hideComments(document);
+        }
+        if (subscriberCountHidden) {
+            hideSubscriberCounts(document);
+        }
         schedulePlaylistEnsure();
-        if (enabled || likesHidden) {
+        if (enabled || likesHidden || likeCountHidden || commentsHidden || subscriberCountHidden) {
             startObserver();
         }
     };
 
     const maybeStart = () => {
         if (!documentReady || !settingsLoaded) return;
-        if (!enabled && !likesHidden) return;
+        if (!enabled && !likesHidden && !likeCountHidden && !commentsHidden && !subscriberCountHidden) return;
         start();
     };
 
@@ -589,7 +981,7 @@
         } else {
             restoreShortsEverywhere(document);
             ensurePlaylistButton();
-            if (!likesHidden) {
+            if (!likesHidden && !likeCountHidden && !commentsHidden && !subscriberCountHidden) {
                 stopObserver();
             }
         }
@@ -612,18 +1004,79 @@
             }
         } else {
             restoreLikesDislikes(document);
-            if (!enabled) {
+            if (likeCountHidden) {
+                scheduleLikeCountSweep();
+            }
+            if (!enabled && !likeCountHidden && !commentsHidden && !subscriberCountHidden) {
                 stopObserver();
             }
         }
     };
 
-    const applyInitialSettings = (initialEnabled, initialPlaylistEnabled, initialLikesHidden) => {
+    const setLikeCountHidden = (nextHidden) => {
+        const normalized = nextHidden === true;
+        if (likeCountHidden === normalized) return;
+        likeCountHidden = normalized;
+        if (likeCountHidden) {
+            if (documentReady) {
+                start();
+            }
+        } else {
+            restoreLikeCounts(document);
+            if (!enabled && !likesHidden && !commentsHidden && !subscriberCountHidden) {
+                stopObserver();
+            }
+        }
+    };
+
+    const setCommentsHidden = (nextHidden) => {
+        const normalized = nextHidden === true;
+        if (commentsHidden === normalized) return;
+        commentsHidden = normalized;
+        if (commentsHidden) {
+            if (documentReady) {
+                start();
+            }
+        } else {
+            restoreComments(document);
+            if (!enabled && !likesHidden && !likeCountHidden && !subscriberCountHidden) {
+                stopObserver();
+            }
+        }
+    };
+
+    const setSubscriberCountHidden = (nextHidden) => {
+        const normalized = nextHidden === true;
+        if (subscriberCountHidden === normalized) return;
+        subscriberCountHidden = normalized;
+        if (subscriberCountHidden) {
+            if (documentReady) {
+                start();
+            }
+        } else {
+            restoreSubscriberCounts(document);
+            if (!enabled && !likesHidden && !likeCountHidden && !commentsHidden) {
+                stopObserver();
+            }
+        }
+    };
+
+    const applyInitialSettings = (
+        initialEnabled,
+        initialPlaylistEnabled,
+        initialLikesHidden,
+        initialLikeCountHidden,
+        initialCommentsHidden,
+        initialSubscriberCountHidden
+    ) => {
         enabled = initialEnabled !== false;
         playlistEnabled = initialPlaylistEnabled !== false;
         likesHidden = initialLikesHidden === true;
+        likeCountHidden = initialLikeCountHidden === true;
+        commentsHidden = initialCommentsHidden === true;
+        subscriberCountHidden = initialSubscriberCountHidden === true;
         settingsLoaded = true;
-        if (enabled || likesHidden) {
+        if (enabled || likesHidden || likeCountHidden || commentsHidden || subscriberCountHidden) {
             maybeStart();
         } else {
             stopObserver();
@@ -633,6 +1086,15 @@
         }
         if (!likesHidden) {
             restoreLikesDislikes(document);
+        }
+        if (!likeCountHidden) {
+            restoreLikeCounts(document);
+        }
+        if (!commentsHidden) {
+            restoreComments(document);
+        }
+        if (!subscriberCountHidden) {
+            restoreSubscriberCounts(document);
         }
         schedulePlaylistEnsure();
     };
@@ -653,12 +1115,40 @@
             .get({
                 [STORAGE_KEY]: DEFAULT_ENABLED,
                 [PLAYLIST_STORAGE_KEY]: DEFAULT_PLAYLIST_ENABLED,
-                [LIKES_STORAGE_KEY]: DEFAULT_LIKES_HIDDEN
+                [LIKES_STORAGE_KEY]: DEFAULT_LIKES_HIDDEN,
+                [LIKE_COUNT_STORAGE_KEY]: DEFAULT_LIKE_COUNT_HIDDEN,
+                [COMMENTS_STORAGE_KEY]: DEFAULT_COMMENTS_HIDDEN,
+                [SUBSCRIBER_COUNT_STORAGE_KEY]: DEFAULT_SUBSCRIBER_COUNT_HIDDEN
             })
-            .then((result) => applyInitialSettings(result[STORAGE_KEY], result[PLAYLIST_STORAGE_KEY], result[LIKES_STORAGE_KEY]))
-            .catch(() => applyInitialSettings(DEFAULT_ENABLED, DEFAULT_PLAYLIST_ENABLED, DEFAULT_LIKES_HIDDEN));
+            .then((result) =>
+                applyInitialSettings(
+                    result[STORAGE_KEY],
+                    result[PLAYLIST_STORAGE_KEY],
+                    result[LIKES_STORAGE_KEY],
+                    result[LIKE_COUNT_STORAGE_KEY],
+                    result[COMMENTS_STORAGE_KEY],
+                    result[SUBSCRIBER_COUNT_STORAGE_KEY]
+                )
+            )
+            .catch(() =>
+                applyInitialSettings(
+                    DEFAULT_ENABLED,
+                    DEFAULT_PLAYLIST_ENABLED,
+                    DEFAULT_LIKES_HIDDEN,
+                    DEFAULT_LIKE_COUNT_HIDDEN,
+                    DEFAULT_COMMENTS_HIDDEN,
+                    DEFAULT_SUBSCRIBER_COUNT_HIDDEN
+                )
+            );
     } else {
-        applyInitialSettings(DEFAULT_ENABLED, DEFAULT_PLAYLIST_ENABLED, DEFAULT_LIKES_HIDDEN);
+        applyInitialSettings(
+            DEFAULT_ENABLED,
+            DEFAULT_PLAYLIST_ENABLED,
+            DEFAULT_LIKES_HIDDEN,
+            DEFAULT_LIKE_COUNT_HIDDEN,
+            DEFAULT_COMMENTS_HIDDEN,
+            DEFAULT_SUBSCRIBER_COUNT_HIDDEN
+        );
     }
 
     if (typeof browser !== "undefined" && browser.storage && browser.storage.onChanged) {
@@ -673,12 +1163,24 @@
             if (changes[LIKES_STORAGE_KEY]) {
                 setLikesHidden(changes[LIKES_STORAGE_KEY].newValue);
             }
+            if (changes[LIKE_COUNT_STORAGE_KEY]) {
+                setLikeCountHidden(changes[LIKE_COUNT_STORAGE_KEY].newValue);
+            }
+            if (changes[COMMENTS_STORAGE_KEY]) {
+                setCommentsHidden(changes[COMMENTS_STORAGE_KEY].newValue);
+            }
+            if (changes[SUBSCRIBER_COUNT_STORAGE_KEY]) {
+                setSubscriberCountHidden(changes[SUBSCRIBER_COUNT_STORAGE_KEY].newValue);
+            }
         });
     }
 
     window.addEventListener("pageshow", () => {
         scheduleSweep();
         scheduleLikesSweep();
+        scheduleLikeCountSweep();
+        scheduleCommentsSweep();
+        scheduleSubscriberCountSweep();
         schedulePlaylistEnsure();
     });
 
@@ -686,12 +1188,18 @@
         if (document.visibilityState === "visible") {
             scheduleSweep();
             scheduleLikesSweep();
+            scheduleLikeCountSweep();
+            scheduleCommentsSweep();
+            scheduleSubscriberCountSweep();
             schedulePlaylistEnsure();
         }
     });
 
     const handleYouTubeNavigate = () => {
         scheduleLikesSweep();
+        scheduleLikeCountSweep();
+        scheduleCommentsSweep();
+        scheduleSubscriberCountSweep();
         schedulePlaylistEnsure();
     };
 
@@ -700,4 +1208,7 @@
 
     schedulePlaylistEnsure();
     scheduleLikesSweep();
+    scheduleLikeCountSweep();
+    scheduleCommentsSweep();
+    scheduleSubscriberCountSweep();
 })();
