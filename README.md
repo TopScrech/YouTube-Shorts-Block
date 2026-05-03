@@ -1,4 +1,5 @@
 # Focus mode for YouTube
+Hide YouTube shorts & other distractions
 
 ## Features
 - Hide shorts in the nav bar, home page and in channel sections
