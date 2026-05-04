@@ -8,6 +8,7 @@
       "layers" : [
         {
           "glass" : false,
+          "hidden" : false,
           "image-name" : "123.png",
           "name" : "123",
           "position" : {
