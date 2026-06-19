@@ -12,4 +12,4 @@ Hide YouTube shorts & other distractions
 
 ## Supported Platforms
 - iOS / iPadOS 15+
-- macOS 11+
+- macOS 12+
