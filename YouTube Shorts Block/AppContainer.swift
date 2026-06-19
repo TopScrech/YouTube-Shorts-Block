@@ -3,7 +3,7 @@ import SwiftUI
 struct AppContainer: View {
     var body: some View {
         Group {
-            if #available(iOS 16, *) {
+            if #available(iOS 16, macOS 13, *) {
                 NavigationStack {
                     SetupInstructionsView()
                 }

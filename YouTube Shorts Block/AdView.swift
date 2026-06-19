@@ -27,7 +27,7 @@ struct AdView: View {
                     .clipShape(.rect(cornerRadius: 8))
                 
                 VStack(alignment: .leading) {
-                    if #available(iOS 16, *) {
+                    if #available(iOS 16, macOS 13, *) {
                         Text(title)
                             .title3(.semibold)
                     } else {
