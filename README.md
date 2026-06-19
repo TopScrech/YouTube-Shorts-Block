@@ -11,5 +11,5 @@ Hide YouTube shorts & other distractions
 - Hide subscriber count (macOS-only)
 
 ## Supported Platforms
-- iOS/iPadOS 15+
-- macOS 11+
+- iOS / iPadOS 15+
+- macOS 12+

@@ -4,7 +4,7 @@ import SwiftUI
 struct YouTubeShortsBlockApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AppContainer()
         }
     }
 }
