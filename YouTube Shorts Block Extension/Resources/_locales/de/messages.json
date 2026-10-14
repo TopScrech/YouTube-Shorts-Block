@@ -1,0 +1,39 @@
+{
+    "extension_name": {
+        "message": "Focus mode for YouTube",
+        "description": "The extension name, kept unchanged in every language"
+    },
+    "extension_description": {
+        "message": "Blende ablenkende YouTube-Funktionen aus und bleib konzentriert"
+    },
+    "block_shorts": {
+        "message": "Shorts blockieren"
+    },
+    "playlist_button": {
+        "message": "Schaltfläche zur Rückkehr zur Playlist"
+    },
+    "hide_likes_dislikes": {
+        "message": "Like-/Dislike-Buttons ausblenden"
+    },
+    "hide_like_count": {
+        "message": "Anzahl der Likes ausblenden"
+    },
+    "hide_comments": {
+        "message": "Kommentare ausblenden"
+    },
+    "hide_subscriber_count": {
+        "message": "Abonnentenzahl ausblenden"
+    },
+    "return_to_playlist": {
+        "message": "Zurück zur Playlist"
+    },
+    "return_to_named_playlist": {
+        "message": "Zurück zur Playlist $PLAYLIST$",
+        "placeholders": {
+            "playlist": {
+                "content": "$1",
+                "example": "Favorites"
+            }
+        }
+    }
+}

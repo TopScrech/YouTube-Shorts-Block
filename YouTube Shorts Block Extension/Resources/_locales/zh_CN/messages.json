@@ -1,0 +1,39 @@
+{
+    "extension_name": {
+        "message": "Focus mode for YouTube",
+        "description": "The extension name, kept unchanged in every language"
+    },
+    "extension_description": {
+        "message": "隐藏 YouTube 上令人分心的功能，保持专注"
+    },
+    "block_shorts": {
+        "message": "屏蔽 Shorts"
+    },
+    "playlist_button": {
+        "message": "返回播放列表按钮"
+    },
+    "hide_likes_dislikes": {
+        "message": "隐藏赞和踩按钮"
+    },
+    "hide_like_count": {
+        "message": "隐藏点赞数"
+    },
+    "hide_comments": {
+        "message": "隐藏评论"
+    },
+    "hide_subscriber_count": {
+        "message": "隐藏订阅人数"
+    },
+    "return_to_playlist": {
+        "message": "返回播放列表"
+    },
+    "return_to_named_playlist": {
+        "message": "返回播放列表 $PLAYLIST$",
+        "placeholders": {
+            "playlist": {
+                "content": "$1",
+                "example": "Favorites"
+            }
+        }
+    }
+}

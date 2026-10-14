@@ -1,0 +1,39 @@
+{
+    "extension_name": {
+        "message": "Focus mode for YouTube",
+        "description": "The extension name, kept unchanged in every language"
+    },
+    "extension_description": {
+        "message": "Скройте отвлекающие функции YouTube и сосредоточьтесь на главном"
+    },
+    "block_shorts": {
+        "message": "Блокировать Shorts"
+    },
+    "playlist_button": {
+        "message": "Кнопка возврата к плейлисту"
+    },
+    "hide_likes_dislikes": {
+        "message": "Скрыть кнопки лайка и дизлайка"
+    },
+    "hide_like_count": {
+        "message": "Скрыть количество лайков"
+    },
+    "hide_comments": {
+        "message": "Скрыть комментарии"
+    },
+    "hide_subscriber_count": {
+        "message": "Скрыть количество подписчиков"
+    },
+    "return_to_playlist": {
+        "message": "Вернуться к плейлисту"
+    },
+    "return_to_named_playlist": {
+        "message": "Вернуться к плейлисту $PLAYLIST$",
+        "placeholders": {
+            "playlist": {
+                "content": "$1",
+                "example": "Favorites"
+            }
+        }
+    }
+}

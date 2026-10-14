@@ -171,13 +171,15 @@
     };
 
     const buildPlaylistLabel = (playlistId) => {
-        const playlistName = normalizePlaylistLabel(getPlaylistName());
-        if (playlistName) {
-            return `Return to playlist ${playlistName}`;
+        const playlistName = normalizePlaylistLabel(getPlaylistName()) || normalizePlaylistLabel(playlistId);
+        if (typeof browser !== "undefined" && browser.i18n) {
+            const message = playlistName
+                ? browser.i18n.getMessage("return_to_named_playlist", playlistName)
+                : browser.i18n.getMessage("return_to_playlist");
+            if (message) return message;
         }
 
-        const fallback = normalizePlaylistLabel(playlistId);
-        return `Return to playlist ${fallback || "playlist"}`;
+        return playlistName ? `Return to playlist ${playlistName}` : "Return to playlist";
     };
 
     const findCommentsSection = () => (

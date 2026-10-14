@@ -1,3 +1,17 @@
+const localizePopup = () => {
+    if (typeof browser === "undefined" || !browser.i18n) return;
+
+    document.documentElement.lang = browser.i18n.getUILanguage();
+    document.documentElement.dir = browser.i18n.getMessage("@@bidi_dir") || "ltr";
+
+    document.querySelectorAll("[data-i18n]").forEach((element) => {
+        const message = browser.i18n.getMessage(element.dataset.i18n);
+        if (message) element.textContent = message;
+    });
+};
+
+localizePopup();
+
 const STORAGE_KEY = "enabled";
 const DEFAULT_ENABLED = true;
 const PLAYLIST_STORAGE_KEY = "playlistButtonEnabled";

@@ -4,7 +4,7 @@ struct AdView: View {
     @Environment(\.colorScheme) private var colorScheme
     
     let title: String
-    let subtitle: String
+    let subtitle: LocalizedStringKey
     let url: URL
     
     private let backgroundRounding = 22.0

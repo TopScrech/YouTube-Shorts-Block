@@ -1,10 +1,39 @@
 {
     "extension_name": {
         "message": "Focus mode for YouTube",
-        "description": "The display name for the extension"
+        "description": "The extension name, kept unchanged in every language"
     },
     "extension_description": {
-        "message": "This is Focus mode for YouTube. You should tell us what your extension does here",
-        "description": "Description of what the extension does"
+        "message": "Hide distracting YouTube features and stay focused"
+    },
+    "block_shorts": {
+        "message": "Block Shorts"
+    },
+    "playlist_button": {
+        "message": "Return to playlist button"
+    },
+    "hide_likes_dislikes": {
+        "message": "Hide likes/dislikes"
+    },
+    "hide_like_count": {
+        "message": "Hide like count"
+    },
+    "hide_comments": {
+        "message": "Hide comments"
+    },
+    "hide_subscriber_count": {
+        "message": "Hide subscriber count"
+    },
+    "return_to_playlist": {
+        "message": "Return to playlist"
+    },
+    "return_to_named_playlist": {
+        "message": "Return to playlist $PLAYLIST$",
+        "placeholders": {
+            "playlist": {
+                "content": "$1",
+                "example": "Favorites"
+            }
+        }
     }
 }
