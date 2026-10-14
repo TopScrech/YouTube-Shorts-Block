@@ -1,0 +1,39 @@
+{
+    "extension_name": {
+        "message": "Focus mode for YouTube",
+        "description": "The extension name, kept unchanged in every language"
+    },
+    "extension_description": {
+        "message": "Приховайте функції YouTube, що відволікають, і зосередьтеся на головному"
+    },
+    "block_shorts": {
+        "message": "Блокувати Shorts"
+    },
+    "playlist_button": {
+        "message": "Кнопка повернення до списку відтворення"
+    },
+    "hide_likes_dislikes": {
+        "message": "Приховати кнопки вподобання й невподобання"
+    },
+    "hide_like_count": {
+        "message": "Приховати кількість вподобань"
+    },
+    "hide_comments": {
+        "message": "Приховати коментарі"
+    },
+    "hide_subscriber_count": {
+        "message": "Приховати кількість підписників"
+    },
+    "return_to_playlist": {
+        "message": "Повернутися до списку відтворення"
+    },
+    "return_to_named_playlist": {
+        "message": "Повернутися до списку відтворення $PLAYLIST$",
+        "placeholders": {
+            "playlist": {
+                "content": "$1",
+                "example": "Favorites"
+            }
+        }
+    }
+}

@@ -1,0 +1,39 @@
+{
+    "extension_name": {
+        "message": "Focus mode for YouTube",
+        "description": "The extension name, kept unchanged in every language"
+    },
+    "extension_description": {
+        "message": "أخفِ ميزات YouTube المشتتة وحافظ على تركيزك"
+    },
+    "block_shorts": {
+        "message": "حظر Shorts"
+    },
+    "playlist_button": {
+        "message": "زر العودة إلى قائمة التشغيل"
+    },
+    "hide_likes_dislikes": {
+        "message": "إخفاء زرّي الإعجاب وعدم الإعجاب"
+    },
+    "hide_like_count": {
+        "message": "إخفاء عدد الإعجابات"
+    },
+    "hide_comments": {
+        "message": "إخفاء التعليقات"
+    },
+    "hide_subscriber_count": {
+        "message": "إخفاء عدد المشتركين"
+    },
+    "return_to_playlist": {
+        "message": "العودة إلى قائمة التشغيل"
+    },
+    "return_to_named_playlist": {
+        "message": "العودة إلى قائمة التشغيل $PLAYLIST$",
+        "placeholders": {
+            "playlist": {
+                "content": "$1",
+                "example": "Favorites"
+            }
+        }
+    }
+}

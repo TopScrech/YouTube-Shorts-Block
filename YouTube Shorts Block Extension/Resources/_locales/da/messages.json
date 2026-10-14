@@ -1,0 +1,39 @@
+{
+    "extension_name": {
+        "message": "Focus mode for YouTube",
+        "description": "The extension name, kept unchanged in every language"
+    },
+    "extension_description": {
+        "message": "Skjul distraherende YouTube-funktioner, og bevar fokus"
+    },
+    "block_shorts": {
+        "message": "Blokér Shorts"
+    },
+    "playlist_button": {
+        "message": "Knap til at vende tilbage til afspilningslisten"
+    },
+    "hide_likes_dislikes": {
+        "message": "Skjul like- og dislike-knapper"
+    },
+    "hide_like_count": {
+        "message": "Skjul antal likes"
+    },
+    "hide_comments": {
+        "message": "Skjul kommentarer"
+    },
+    "hide_subscriber_count": {
+        "message": "Skjul antal abonnenter"
+    },
+    "return_to_playlist": {
+        "message": "Tilbage til afspilningslisten"
+    },
+    "return_to_named_playlist": {
+        "message": "Tilbage til afspilningslisten $PLAYLIST$",
+        "placeholders": {
+            "playlist": {
+                "content": "$1",
+                "example": "Favorites"
+            }
+        }
+    }
+}

@@ -1,0 +1,39 @@
+{
+    "extension_name": {
+        "message": "Focus mode for YouTube",
+        "description": "The extension name, kept unchanged in every language"
+    },
+    "extension_description": {
+        "message": "YouTube की ध्यान भटकाने वाली सुविधाएँ छिपाएँ और ध्यान केंद्रित रखें"
+    },
+    "block_shorts": {
+        "message": "Shorts ब्लॉक करें"
+    },
+    "playlist_button": {
+        "message": "प्लेलिस्ट पर लौटने का बटन"
+    },
+    "hide_likes_dislikes": {
+        "message": "लाइक/डिसलाइक बटन छिपाएँ"
+    },
+    "hide_like_count": {
+        "message": "लाइक की संख्या छिपाएँ"
+    },
+    "hide_comments": {
+        "message": "टिप्पणियाँ छिपाएँ"
+    },
+    "hide_subscriber_count": {
+        "message": "सदस्यों की संख्या छिपाएँ"
+    },
+    "return_to_playlist": {
+        "message": "प्लेलिस्ट पर लौटें"
+    },
+    "return_to_named_playlist": {
+        "message": "$PLAYLIST$ प्लेलिस्ट पर लौटें",
+        "placeholders": {
+            "playlist": {
+                "content": "$1",
+                "example": "Favorites"
+            }
+        }
+    }
+}

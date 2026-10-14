@@ -1,0 +1,39 @@
+{
+    "extension_name": {
+        "message": "Focus mode for YouTube",
+        "description": "The extension name, kept unchanged in every language"
+    },
+    "extension_description": {
+        "message": "Dikkat dağıtan YouTube özelliklerini gizleyin ve odaklanın"
+    },
+    "block_shorts": {
+        "message": "Shorts’u engelle"
+    },
+    "playlist_button": {
+        "message": "Oynatma listesine dön düğmesi"
+    },
+    "hide_likes_dislikes": {
+        "message": "Beğeni/beğenmeme düğmelerini gizle"
+    },
+    "hide_like_count": {
+        "message": "Beğeni sayısını gizle"
+    },
+    "hide_comments": {
+        "message": "Yorumları gizle"
+    },
+    "hide_subscriber_count": {
+        "message": "Abone sayısını gizle"
+    },
+    "return_to_playlist": {
+        "message": "Oynatma listesine dön"
+    },
+    "return_to_named_playlist": {
+        "message": "$PLAYLIST$ oynatma listesine dön",
+        "placeholders": {
+            "playlist": {
+                "content": "$1",
+                "example": "Favorites"
+            }
+        }
+    }
+}
