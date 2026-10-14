@@ -5,10 +5,10 @@ struct AppContainer: View {
         Group {
             if #available(iOS 16, macOS 13, *) {
                 NavigationStack {
-                    SetupInstructionsView()
+                    SetupInstructions()
                 }
             } else {
-                SetupInstructionsView()
+                SetupInstructions()
             }
         }
 #if os(macOS)
