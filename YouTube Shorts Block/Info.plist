@@ -6,8 +6,6 @@
 	<dict>
 		<key>UIColorName</key>
 		<string>AccentColor</string>
-		<key>UIImageName</key>
-		<string>LargeIcon</string>
 	</dict>
 </dict>
 </plist>
