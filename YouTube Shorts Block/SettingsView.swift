@@ -4,7 +4,7 @@ struct SettingsView: View {
     var body: some View {
         List {
             Section {
-                let url = URL(string: "https://github.com/TopScrech/Swifty-Master")!
+                let url = URL(string: "https://github.com/TopScrech/YouTube-Shorts-Block")!
                 
                 Link(destination: url) {
                     HStack(spacing: 12) {
