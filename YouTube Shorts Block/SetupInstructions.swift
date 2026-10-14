@@ -1,6 +1,6 @@
 import ScrechKit
 
-struct SetupInstructionsView: View {
+struct SetupInstructions: View {
     private let steps = [
         "Open Settings > Safari > Extensions",
         "Tap Focus mode for YouTube and turn on \"Allow Extension\"",
@@ -41,7 +41,10 @@ struct SetupInstructionsView: View {
                     }
                 }
                 .padding(16)
-                .background(cardBackground)
+                .background {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(.thinMaterial)
+                }
                 
                 Text("You can also toggle blocking from the Safari extension button")
                     .secondary()
@@ -50,7 +53,7 @@ struct SetupInstructionsView: View {
                 
                 AdView(title: "FanControl", subtitle: "Keep Your Mac Cool and Quiet", url: fanControlURL)
             }
-            .padding(24)
+            .toolbarAwareScenePadding()
             .frame(maxWidth: 520)
             .frame(maxWidth: .infinity)
         }
@@ -61,10 +64,5 @@ struct SetupInstructionsView: View {
                 Label("Settings", systemImage: "gear")
             }
         }
-    }
-    
-    private var cardBackground: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .fill(.thinMaterial)
     }
 }
