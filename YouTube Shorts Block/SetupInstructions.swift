@@ -1,7 +1,7 @@
 import ScrechKit
 
 struct SetupInstructions: View {
-    private let steps = [
+    private let steps: [LocalizedStringKey] = [
         "Open Settings > Safari > Extensions",
         "Tap Focus mode for YouTube and turn on \"Allow Extension\"",
         "Open Safari, go to YouTube, then tap the AA button > Extensions > Focus mode for YouTube and allow it for this website"
