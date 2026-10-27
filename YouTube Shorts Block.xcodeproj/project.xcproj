@@ -87,11 +87,32 @@
   ],
   "targets": [
     {
+      "name": "Check Package Updates",
+      "id": "1C096547A1394812A6E5A981",
+      "kind": "aggregate",
+      "build-phases": [
+        {
+          "kind": "script",
+          "name": "Check Package Updates",
+          "run-on-every-build": true,
+          "shell": "/bin/sh",
+          "script": "/usr/bin/python3 \"$SRCROOT/Scripts/check-package-updates.py\""
+        }
+      ],
+      "build-settings": {
+        "SDKROOT": "macosx",
+        "SUPPORTED_PLATFORMS": "macosx",
+        "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+        "SKIP_INSTALL": "YES"
+      }
+    },
+    {
       "name": "YouTube Shorts Block",
       "id": "F36549D82F1F05460076EF1F",
       "product": "Products/Focus mode for YouTube.app",
       "product-type": "application",
       "dependencies": [
+        "Check Package Updates",
         { "kind": "package", "package": "SwiftLintPlugins", "product-name": "SwiftLintBuildToolPlugin", "product-type": "build-tool-plugin" },
         "YouTube Shorts Block Extension",
       ],
@@ -162,6 +183,7 @@
       "product": "Products/YouTube Shorts Block Extension.appex",
       "product-type": "app-extension",
       "dependencies": [
+        "Check Package Updates",
         { "kind": "package", "package": "SwiftLintPlugins", "product-name": "SwiftLintBuildToolPlugin", "product-type": "build-tool-plugin" },
       ],
       "build-phases": [
